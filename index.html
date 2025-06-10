@@ -1,0 +1,1898 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft 3D Skin Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #6d9dc5 0%, #8fbc8f 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            min-height: 100vh;
+        }
+
+        .toolbar {
+            background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 100%);
+            padding: 15px 20px;
+            border-bottom: 3px solid #8b4513;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        
+        .title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .toolbar h1 {
+            font-size: 20px;
+            color: #ffffff;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .minecraft-decoration {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .minecraft-block {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #000;
+            position: relative;
+            image-rendering: pixelated;
+        }
+
+        .block-dirt {
+            background: linear-gradient(45deg, #8b4513 25%, #a0522d 25%, #a0522d 50%, #8b4513 50%, #8b4513 75%, #a0522d 75%);
+            background-size: 4px 4px;
+        }
+
+        .block-grass {
+            background: linear-gradient(to bottom, #9acd32 0%, #9acd32 30%, #8b4513 30%, #8b4513 70%, #a0522d 70%);
+        }
+
+        .block-stone {
+            background: linear-gradient(45deg, #696969 25%, #808080 25%, #808080 50%, #696969 50%, #696969 75%, #808080 75%);
+            background-size: 3px 3px;
+        }
+
+        .social-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+            gap: 6px;
+            color: #1da1f2;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 500;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 2px solid #1da1f2;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            white-space: nowrap;
+        }
+
+        .social-link:hover {
+            background: #1da1f2;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(29, 161, 242, 0.4);
+        }
+
+        .social-icon {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border-radius: 6px;
+            border: 2px solid #8b4513;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tool-group-label {
+            font-size: 11px;
+            color: #4a4a4a;
+            font-weight: 700;
+            margin-right: 5px;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+
+        .tool-btn {
+            padding: 8px 12px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 10px;
+            font-weight: 600;
+            color: #2a2a2a;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            white-space: nowrap;
+        }
+
+        .tool-btn:hover {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .tool-btn.export {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border-color: #2e7d32;
+        }
+
+        .tool-btn.import {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border-color: #e65100;
+        }
+
+        .tool-btn.clear {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            border-color: #b71c1c;
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-color: #0D47A1;
+        }
+
+        .ai-generator {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ai-input {
+            flex: 1;
+            min-width: 200px;
+            border: 2px solid #8b4513;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        .ai-generate-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            display: flex;
+            min-width: 180px;
+            line-height: 1.5;
+            color: white;
+            border: 2px solid #e65100;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .ai-generate-btn:hover {
+            background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #8b4513;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            background: linear-gradient(45deg, #e8f4f8 25%, #f0f8ff 25%, #f0f8ff 50%, #e8f4f8 50%, #e8f4f8 75%, #f0f8ff 75%);
+            background-size: 20px 20px;
+            border-left: 3px solid #8b4513;
+            border-right: 3px solid #8b4513;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 320px;
+            padding: 20px;
+            background: rgba(255,255,255,0.9);
+            border-right: 3px solid #8b4513;
+            overflow-y: auto;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .center-panel {
+            flex: 1;
+            padding: 20px;
+            background: rgba(240,248,255,0.9);
+            overflow: hidden;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .right-panel {
+            width: 300px;
+            padding: 20px;
+            background: rgba(255,255,255,0.9);
+            border-left: 3px solid #8b4513;
+            overflow-y: auto;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .viewer-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 3px solid #8b4513;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .skin-preview {
+            width: 100%;
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #skinViewer {
+            width: 100%;
+            height: 100%;
+            border-radius: 3px;
+            cursor: crosshair;
+        }
+
+        .controls {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #8b4513;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            color: #4a4a4a;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            min-width: 50px;
+            height: 40px;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .layer-controls {
+            background: rgba(255,255,255,0.7);
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .layer-toggle-btn {
+            padding: 6px 8px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2a2a2a;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .layer-toggle-btn.visible {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border-color: #2e7d32;
+        }
+
+        .layer-toggle-btn.editing {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-color: #0D47A1;
+            border-width: 3px;
+        }
+
+        .layer-toggle-btn:hover {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .layer-toggle-btn.visible:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+        }
+
+        .layer-toggle-btn.editing:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+        }
+
+        .layer-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .body-parts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .body-part-btn {
+            padding: 12px 8px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2a2a2a;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .body-part-btn.hidden {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            border-color: #b71c1c;
+        }
+
+        .body-part-btn:hover {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .body-part-btn.hidden:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #c62828 100%);
+        }
+
+        .action-btn {
+            padding: 6px 10px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 10px;
+            font-weight: 600;
+            color: #2a2a2a;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            min-width: 70px;
+            flex: 1;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .grid-tool-btn {
+            padding: 10px 8px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2a2a2a;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-tool-btn:hover {
+            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .grid-tool-btn.active {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            border-color: #0D47A1;
+        }
+
+        .grid-tool-btn.active:hover {
+            background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        .status-bar {
+            background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 100%);
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #ffffff;
+            border-top: 3px solid #8b4513;
+            font-family: 'Courier New', monospace;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+            z-index: 10;
+            min-height: 50px;
+            flex-shrink: 0;
+            border-left: 3px solid #8b4513;
+            border-right: 3px solid #8b4513;
+            border-bottom: 3px solid #8b4513;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .edit-mode-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .color-code-input {
+            width: 80px;
+            border: 2px solid #8b4513;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            background: white;
+        }
+
+        .color-apply-btn {
+            padding: 6px 10px;
+            border: 2px solid #8b4513;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            transition: all 0.2s;
+        }
+
+        .color-apply-btn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 1200px) {
+            .left-panel, .right-panel {
+                width: 250px;
+            }
+            
+            .social-link {
+                min-width: 120px;
+                font-size: 9px;
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title-bar {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .social-links {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-panel, .right-panel {
+                width: 100%;
+                height: auto;
+                min-height: 200px;
+            }
+            
+            .center-panel {
+                width: 100%;
+                min-height: 400px;
+            }
+
+            .layer-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="toolbar">
+            <div class="title-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h1>🎨 Minecraft 3D Skin Editor</h1>
+                    <div class="minecraft-decoration">
+                        <div class="minecraft-block block-grass"></div>
+                        <div class="minecraft-block block-dirt"></div>
+                        <div class="minecraft-block block-stone"></div>
+                    </div>
+                </div>
+                <div class="social-links">
+                    <a href="https://discord.gg/RKjspnTBmb" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg class="social-icon" viewBox="0 0 24 24">
+                            <path d="M19.952,5.672c-1.904-1.531-4.916-1.79-5.044-1.801c-0.201-0.017-0.392,0.097-0.474,0.281 c-0.006,0.012-0.072,0.163-0.145,0.398c1.259,0.212,2.806,0.64,4.206,1.509c0.224,0.139,0.293,0.434,0.154,0.659 c-0.09,0.146-0.247,0.226-0.407,0.226c-0.086,0-0.173-0.023-0.252-0.072C15.584,5.38,12.578,5.305,12,5.305S8.415,5.38,6.011,6.872 c-0.225,0.14-0.519,0.07-0.659-0.154c-0.14-0.225-0.07-0.519,0.154-0.659c1.4-0.868,2.946-1.297,4.206-1.509 c-0.074-0.236-0.14-0.386-0.145-0.398C9.484,3.968,9.294,3.852,9.092,3.872c-0.127,0.01-3.139,0.269-5.069,1.822 C3.015,6.625,1,12.073,1,16.783c0,0.083,0.022,0.165,0.063,0.237c1.391,2.443,5.185,3.083,6.05,3.111c0.005,0,0.01,0,0.015,0 c0.153,0,0.297-0.073,0.387-0.197l0.875-1.202c-2.359-0.61-3.564-1.645-3.634-1.706c-0.198-0.175-0.217-0.477-0.042-0.675 c0.175-0.198,0.476-0.217,0.674-0.043c0.029,0.026,2.248,1.909,6.612,1.909c4.372,0,6.591-1.891,6.613-1.91 c0.198-0.172,0.5-0.154,0.674,0.045c0.174,0.198,0.155,0.499-0.042,0.673c-0.07,0.062-1.275,1.096-3.634,1.706l0.875,1.202 c0.09,0.124,0.234,0.197,0.387,0.197c0.005,0,0.01,0,0.015,0c0.865-0.027,4.659-0.667,6.05-3.111 C22.978,16.947,23,16.866,23,16.783C23,12.073,20.985,6.625,19.952,5.672z M8.891,14.87c-0.924,0-1.674-0.857-1.674-1.913 s0.749-1.913,1.674-1.913s1.674,0.857,1.674,1.913S9.816,14.87,8.891,14.87z M15.109,14.87c-0.924,0-1.674-0.857-1.674-1.913 s0.749-1.913,1.674-1.913c0.924,0,1.674,0.857,1.674,1.913S16.033,14.87,15.109,14.87z"></path>
+                        </svg>
+                        Discord Server
+                    </a>
+                    <a href="https://github.com/aeromechanic000/minecraft-ai-oc-creator" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg class="social-icon" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+                        </svg>
+                        GitHub Repository 
+                    </a>
+                    <a href="https://x.com/aeromechan71402" target="_blank" rel="noopener noreferrer" class="social-link">
+                        <svg class="social-icon" viewBox="0 0 24 24">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                        </svg>
+                        @aeromechan71402
+                    </a>
+                </div>
+            </div>
+            
+            <div class="toolbar-row">
+                <div class="tool-group">
+                    <span class="tool-group-label">📂 File</span>
+                    <input type="file" id="import-skin" accept=".png" class="hidden-file-input">
+                    <button onclick="document.getElementById('import-skin').click()" class="tool-btn import">Import PNG</button>
+                    <button onclick="exportSkin()" class="tool-btn export">Export PNG</button>
+                    <button onclick="newSkin()" class="tool-btn">New Skin</button>
+                    <button onclick="clearSkin()" class="tool-btn clear">Clear</button>
+                </div>
+
+                <div class="ai-generator">
+                    <input type="text" class="ai-input" id="ai-input" placeholder="Describe skin modifications (e.g., 'Add red stripes to the shirt')">
+                    <button id="ai-generate-btn" class="ai-generate-btn">
+                        <span>🤖 Generate Modifications</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="panel-title">⚙️ Settings</div>
+
+                <div class="layer-controls">
+                    <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">📋 Display Options</div>
+                    <div class="layer-row">
+                        <button id="layer-body" class="layer-toggle-btn visible editing" onclick="toggleLayerEditAndVisibility('body')">👁️ Body</button>
+                        <button id="layer-outer" class="layer-toggle-btn" onclick="toggleLayerEditAndVisibility('outer')">👁️‍🗨️ Outer</button>
+                        <button id="pixel-grid-btn" class="layer-toggle-btn visible" onclick="togglePixelGrid()">🔲 Grid</button>
+                    </div>
+                </div>
+
+                <div class="layer-controls">
+                    <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">👤 Body Parts</div>
+                    <div class="body-parts-grid">
+                        <button class="body-part-btn" id="part-head" onclick="toggleBodyPart('head')">👤 Head</button>
+                        <button class="body-part-btn" id="part-body" onclick="toggleBodyPart('body')">🎽 Body</button>
+                        <button class="body-part-btn" id="part-leftarm" onclick="toggleBodyPart('leftarm')">🤳 L.Arm</button>
+                        <button class="body-part-btn" id="part-rightarm" onclick="toggleBodyPart('rightarm')">💪 R.Arm</button>
+                        <button class="body-part-btn" id="part-leftleg" onclick="toggleBodyPart('leftleg')">🦵 L.Leg</button>
+                        <button class="body-part-btn" id="part-rightleg" onclick="toggleBodyPart('rightleg')">🏃 R.Leg</button>
+                    </div>
+                </div>
+
+                <div class="layer-controls">
+                    <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">🔧 Actions</div>
+                    <div class="action-row">
+                        <button onclick="undoAction()" class="action-btn">↶ Undo</button>
+                        <button onclick="redoAction()" class="action-btn">↷ Redo</button>
+                    </div>
+                    <div class="action-row">
+                        <button onclick="mirrorSkin()" class="action-btn">🪞 Mirror</button>
+                        <button onclick="flipSkin()" class="action-btn">🔄 Flip</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="center-panel">
+                <div class="panel-title">🎮 3D Skin Editor</div>
+                
+                <div class="viewer-container">
+                    <div class="edit-mode-indicator" id="edit-mode-indicator">Editing: Body Layer</div>
+                    <div class="skin-preview">
+                        <canvas id="skinViewer"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button id="resetView" class="control-btn">🔄 Reset View</button>
+                        <button id="toggleMode" class="control-btn">🔄 Toggle Mode</button>
+                        <button id="zoomIn" class="control-btn">🔍 Zoom+</button>
+                        <button id="zoomOut" class="control-btn">🔍 Zoom-</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="panel-title">🎨 Color Palette</div>
+                
+                <div class="layer-controls">
+                    <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">🎯 Common Colors</div>
+                    <div id="color-palette" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 15px;">
+                        <!-- Color swatches will be generated here -->
+                    </div>
+                    
+                    <div class="color-input-group">
+                        <input type="text" id="color-code-input" class="color-code-input" placeholder="#8B4513" value="#8B4513">
+                        <button onclick="applyColorCode()" class="color-apply-btn">Apply</button>
+                    </div>
+                </div>
+
+                <div class="layer-controls">
+                    <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">🎨 3D Tools</div>
+                    <div class="tools-grid">
+                        <button id="tool-pen" class="grid-tool-btn active" onclick="setTool('pen')">✏️ Pen</button>
+                        <button id="tool-brush" class="grid-tool-btn" onclick="setTool('brush')">🖌️ Brush</button>
+                        <button id="tool-eyedropper" class="grid-tool-btn" onclick="setTool('eyedropper')">💧 Picker</button>
+                        <button id="tool-rotate" class="grid-tool-btn" onclick="setTool('rotate')">🔄 Rotate</button>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <label style="font-size: 12px; font-weight: bold; color: #4a4a4a; margin-bottom: 8px; display: block;">Current Color:</label>
+                        <input type="color" id="color-picker" class="color-picker" value="#8B4513" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-info">
+                <span id="status-text">🎨 3D Paint Mode - Click on the model to paint pixels!</span>
+                <span id="pixel-info">Editing: Body Layer | Tool: Pen</span>
+                <span id="camera-info">Camera: Free | Zoom: 100%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let voxelModel, playerModel;
+        let currentTool = 'pen';
+        let currentEditingLayer = 'body';
+        let currentColor = '#8B4513';
+        let showPixelGrid = true;
+        let isEditMode = true;
+
+        // Layer visibility states
+        let layerVisibility = {
+            body: true,
+            outer: true
+        };
+
+        // Interaction variables
+        let mouse = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        let hoveredVoxel = null;
+        let isDragging = false;
+        let dragStart = new THREE.Vector2();
+
+        // Skin data
+        let skinData = {
+            body: new Uint8ClampedArray(64 * 64 * 4),
+            outer: new Uint8ClampedArray(64 * 64 * 4)
+        };
+
+        // Undo/Redo system
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_UNDO_STEPS = 50;
+
+        // Body parts visibility
+        let bodyPartsVisible = {
+            head: true,
+            body: true,
+            leftarm: true,
+            rightarm: true,
+            leftleg: true,
+            rightleg: true
+        };
+
+        // 36 Common Minecraft colors palette
+        let commonColors = [
+            '#8B4513', '#F4A460', '#DEB887', '#D2691E', '#654321', '#A0522D',  // Browns/Skin tones
+            '#FF0000', '#FF4500', '#FF6347', '#DC143C', '#8B0000', '#B22222',  // Reds
+            '#0000FF', '#4169E1', '#1E90FF', '#87CEEB', '#000080', '#191970',  // Blues
+            '#228B22', '#32CD32', '#00FF00', '#ADFF2F', '#006400', '#9ACD32',  // Greens
+            '#800080', '#9932CC', '#DA70D6', '#FF69B4', '#4B0082', '#8A2BE2',  // Purples
+            '#FFFF00', '#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B',  // Yellows/Golds
+            '#000000', '#2F2F2F', '#696969', '#808080', '#C0C0C0', '#FFFFFF'   // Grays
+        ];
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initScene();
+            initSkinData();
+            setupEventListeners();
+            generateColorPalette();
+            createVoxelModel();
+            updateLayerDisplay();
+            updateLayerButtons();
+            updatePixelGridButton();
+            updateStatus('🎨 3D Skin Editor loaded - Click to paint!');
+        });
+
+        function initScene() {
+            const container = document.querySelector('.skin-preview');
+            
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x2a2a2a);
+            
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(3, 2, 3);
+            camera.lookAt(0, 1, 0);
+            
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('skinViewer'),
+                antialias: true 
+            });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Simple orbit controls
+            setupCameraControls();
+            
+            // Start animation loop
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function setupCameraControls() {
+            let isRotating = false;
+            const canvas = renderer.domElement;
+            
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            canvas.addEventListener('wheel', onMouseWheel);
+            canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        function onMouseDown(event) {
+            event.preventDefault();
+            
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            dragStart.copy(mouse);
+            
+            if ((currentTool === 'pen' || currentTool === 'brush') && isEditMode) {
+                paintVoxel();
+            } else if (currentTool === 'eyedropper' && isEditMode) {
+                pickColor();
+            } else if (currentTool === 'rotate' || event.button === 2 || (isEditMode && event.shiftKey)) {
+                // Allow rotation in edit mode when shift is held, or always with rotate tool
+                isRotating = true;
+            }
+            
+            isDragging = true;
+        }
+
+        function onMouseMove(event) {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            // Update raycasting for hover effects
+            if (isEditMode) {
+                updateVoxelHover();
+            }
+            
+            if (isDragging && (currentTool === 'rotate' || isRotating)) {
+                const deltaX = mouse.x - dragStart.x;
+                const deltaY = mouse.y - dragStart.y;
+                
+                // Rotate camera around target
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                spherical.theta -= deltaX * 2;
+                spherical.phi += deltaY * 2;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 1, 0);
+                
+                dragStart.copy(mouse);
+            } else if (isDragging && (currentTool === 'pen' || currentTool === 'brush') && isEditMode && !isRotating) {
+                paintVoxel();
+            }
+        }
+
+        function onMouseUp(event) {
+            isDragging = false;
+            isRotating = false;
+        }
+
+        function onMouseWheel(event) {
+            event.preventDefault();
+            
+            const zoomSpeed = 0.1;
+            const direction = event.deltaY > 0 ? 1 : -1;
+            
+            camera.position.multiplyScalar(1 + direction * zoomSpeed);
+            
+            // Limit zoom
+            const distance = camera.position.length();
+            if (distance < 2) camera.position.setLength(2);
+            if (distance > 10) camera.position.setLength(10);
+            
+            updateCameraInfo();
+        }
+
+        function updateVoxelHover() {
+            raycaster.setFromCamera(mouse, camera);
+            
+            if (voxelModel) {
+                const intersects = raycaster.intersectObjects(voxelModel.children, true);
+                
+                // Clear previous hover
+                if (hoveredVoxel) {
+                    hoveredVoxel.material.emissive.setHex(0x000000);
+                    hoveredVoxel = null;
+                }
+                
+                if (intersects.length > 0) {
+                    const intersect = intersects[0];
+                    const voxel = intersect.object;
+                    
+                    if (voxel.userData && voxel.userData.x !== undefined) {
+                        hoveredVoxel = voxel;
+                        voxel.material.emissive.setHex(0x404040);
+                    }
+                }
+            }
+        }
+
+        function paintVoxel() {
+            if (!hoveredVoxel || !hoveredVoxel.userData) return;
+            
+            const x = hoveredVoxel.userData.x;
+            const y = hoveredVoxel.userData.y;
+            const z = hoveredVoxel.userData.z;
+            
+            // Save state for undo
+            saveUndoState();
+            
+            // Convert 3D position to 2D texture coordinates
+            const texCoords = voxelToTexture(x, y, z);
+            
+            if (texCoords) {
+                if (currentTool === 'pen') {
+                    paintPixelPen(texCoords.x, texCoords.y);
+                } else if (currentTool === 'brush') {
+                    paintPixelBrush(texCoords.x, texCoords.y);
+                }
+                updateVoxelModel();
+            }
+        }
+
+        function pickColor() {
+            if (!hoveredVoxel || !hoveredVoxel.userData) return;
+            
+            const x = hoveredVoxel.userData.x;
+            const y = hoveredVoxel.userData.y;
+            const z = hoveredVoxel.userData.z;
+            
+            const texCoords = voxelToTexture(x, y, z);
+            
+            if (texCoords) {
+                const color = getPixelColor(texCoords.x, texCoords.y);
+                currentColor = color;
+                document.getElementById('color-picker').value = color;
+                document.getElementById('color-code-input').value = color;
+                updateStatus(`Color picked: ${color}`);
+            }
+        }
+
+        function voxelToTexture(voxelX, voxelY, voxelZ) {
+            // Simplified mapping for demonstration
+            if (voxelY >= 6 && voxelY <= 8) { // Head area
+                return {
+                    x: Math.floor(8 + (voxelX + 4) * 8/8),
+                    y: Math.floor(8 + (8 - voxelY) * 8/8)
+                };
+            }
+            
+            if (voxelY >= 2 && voxelY <= 6) { // Body area
+                return {
+                    x: Math.floor(20 + (voxelX + 4) * 8/8),
+                    y: Math.floor(20 + (6 - voxelY) * 12/4)
+                };
+            }
+            
+            return {
+                x: Math.floor((voxelX + 32) % 64),
+                y: Math.floor((voxelZ + 32) % 64)
+            };
+        }
+
+        function initSkinData() {
+            // Initialize body layer with default skin colors
+            for (let i = 0; i < skinData.body.length; i += 4) {
+                skinData.body[i] = 244;     // R
+                skinData.body[i + 1] = 164; // G
+                skinData.body[i + 2] = 96;  // B
+                skinData.body[i + 3] = 255; // A
+            }
+            
+            // Initialize outer layer as transparent
+            for (let i = 0; i < skinData.outer.length; i += 4) {
+                skinData.outer[i] = 0;      // R
+                skinData.outer[i + 1] = 0;  // G
+                skinData.outer[i + 2] = 0;  // B
+                skinData.outer[i + 3] = 0;  // A (transparent)
+            }
+            
+            loadDefaultSkin();
+        }
+
+        function loadDefaultSkin() {
+            // Head - brown hair
+            fillRect('body', 8, 0, 8, 8, '#8B4513');
+            fillRect('body', 0, 8, 32, 8, '#8B4513');
+            
+            // Face
+            fillRect('body', 8, 8, 8, 8, '#F4A460');
+            setPixel('body', 10, 10, '#000000'); // Eyes
+            setPixel('body', 13, 10, '#000000');
+            setPixel('body', 11, 13, '#8B4513'); // Mouth
+            setPixel('body', 12, 13, '#8B4513');
+            
+            // Body - blue shirt
+            fillRect('body', 20, 20, 8, 12, '#0000FF');
+            fillRect('body', 16, 20, 4, 12, '#0000FF');
+            fillRect('body', 28, 20, 4, 12, '#0000FF');
+            fillRect('body', 32, 20, 8, 12, '#0000FF');
+            
+            // Arms - skin color
+            fillRect('body', 44, 20, 12, 12, '#F4A460');
+            fillRect('body', 36, 52, 16, 12, '#F4A460');
+            
+            // Legs - brown pants
+            fillRect('body', 4, 20, 12, 12, '#654321');
+            fillRect('body', 20, 52, 12, 12, '#654321');
+        }
+
+        // Pen tool - draws with exact current color
+        function paintPixelPen(x, y) {
+            if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
+            
+            const rgb = hexToRgb(currentColor);
+            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            
+            const index = (y * 64 + x) * 4;
+            data[index] = rgb.r;
+            data[index + 1] = rgb.g;
+            data[index + 2] = rgb.b;
+            data[index + 3] = 255;
+        }
+
+        // Brush tool - draws with random brightness shift of current color
+        function paintPixelBrush(x, y) {
+            if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
+            
+            const rgb = hexToRgb(currentColor);
+            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            
+            // Random brightness shift between -30 and +30
+            const brightnessShift = (Math.random() - 0.5) * 60;
+            
+            // Apply brightness shift to each color component
+            let newR = Math.round(rgb.r + brightnessShift);
+            let newG = Math.round(rgb.g + brightnessShift);
+            let newB = Math.round(rgb.b + brightnessShift);
+            
+            // Clamp values between 0 and 255
+            newR = Math.max(0, Math.min(255, newR));
+            newG = Math.max(0, Math.min(255, newG));
+            newB = Math.max(0, Math.min(255, newB));
+            
+            const index = (y * 64 + x) * 4;
+            data[index] = newR;
+            data[index + 1] = newG;
+            data[index + 2] = newB;
+            data[index + 3] = 255;
+        }
+
+        function getPixelColor(x, y) {
+            if (x < 0 || x >= 64 || y < 0 || y >= 64) return '#000000';
+            
+            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            const index = (y * 64 + x) * 4;
+            
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+            
+            return rgbToHex(r, g, b);
+        }
+
+        function createVoxelModel() {
+            voxelModel = new THREE.Group();
+            createBodyPartVoxels();
+            scene.add(voxelModel);
+        }
+
+        function createBodyPartVoxels() {
+            const voxelSize = 0.125;
+            const voxelGeo = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize);
+            
+            // Create body parts with proper grouping
+            const headGroup = new THREE.Group();
+            const bodyGroup = new THREE.Group();
+            const leftArmGroup = new THREE.Group();
+            const rightArmGroup = new THREE.Group();
+            const leftLegGroup = new THREE.Group();
+            const rightLegGroup = new THREE.Group();
+            
+            // Head voxels
+            for (let x = -4; x < 4; x++) {
+                for (let y = 0; y < 8; y++) {
+                    for (let z = -4; z < 4; z++) {
+                        const voxel = createVoxel(x, y + 6, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'head';
+                        headGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Body voxels
+            for (let x = -4; x < 4; x++) {
+                for (let y = 0; y < 12; y++) {
+                    for (let z = -2; z < 2; z++) {
+                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'body';
+                        bodyGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Right arm voxels
+            for (let x = -6; x < -2; x++) {
+                for (let y = 0; y < 12; y++) {
+                    for (let z = -2; z < 2; z++) {
+                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'rightarm';
+                        rightArmGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Left arm voxels
+            for (let x = 2; x < 6; x++) {
+                for (let y = 0; y < 12; y++) {
+                    for (let z = -2; z < 2; z++) {
+                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'leftarm';
+                        leftArmGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Right leg voxels
+            for (let x = -2; x < 0; x++) {
+                for (let y = 0; y < 12; y++) {
+                    for (let z = -2; z < 2; z++) {
+                        const voxel = createVoxel(x, y - 18, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'rightleg';
+                        rightLegGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Left leg voxels
+            for (let x = 0; x < 2; x++) {
+                for (let y = 0; y < 12; y++) {
+                    for (let z = -2; z < 2; z++) {
+                        const voxel = createVoxel(x, y - 18, z, voxelGeo, voxelSize);
+                        voxel.userData.bodyPart = 'leftleg';
+                        leftLegGroup.add(voxel);
+                    }
+                }
+            }
+            
+            // Add groups to main model with names for easy access
+            headGroup.name = 'head';
+            bodyGroup.name = 'body';
+            leftArmGroup.name = 'leftarm';
+            rightArmGroup.name = 'rightarm';
+            leftLegGroup.name = 'leftleg';
+            rightLegGroup.name = 'rightleg';
+            
+            voxelModel.add(headGroup);
+            voxelModel.add(bodyGroup);
+            voxelModel.add(leftArmGroup);
+            voxelModel.add(rightArmGroup);
+            voxelModel.add(leftLegGroup);
+            voxelModel.add(rightLegGroup);
+        }
+
+        function createVoxel(x, y, z, geometry, voxelSize) {
+            const material = new THREE.MeshLambertMaterial({
+                color: getVoxelColor(x, y, z),
+                transparent: true
+            });
+            
+            const voxel = new THREE.Mesh(geometry, material);
+            voxel.position.set(x * voxelSize, y * voxelSize, z * voxelSize);
+            voxel.userData = { x, y, z };
+            
+            return voxel;
+        }
+
+        function getVoxelColor(x, y, z) {
+            const texCoords = voxelToTexture(x, y, z);
+            
+            if (texCoords) {
+                // Combine colors from both layers if both are visible
+                let finalColor = 0xF4A460; // Default skin color
+                
+                if (layerVisibility.body) {
+                    const bodyData = skinData.body;
+                    const bodyIndex = (texCoords.y * 64 + texCoords.x) * 4;
+                    const bodyR = bodyData[bodyIndex];
+                    const bodyG = bodyData[bodyIndex + 1];
+                    const bodyB = bodyData[bodyIndex + 2];
+                    finalColor = (bodyR << 16) | (bodyG << 8) | bodyB;
+                }
+                
+                if (layerVisibility.outer) {
+                    const outerData = skinData.outer;
+                    const outerIndex = (texCoords.y * 64 + texCoords.x) * 4;
+                    const outerA = outerData[outerIndex + 3];
+                    
+                    // If outer layer has non-transparent pixel, use it
+                    if (outerA > 0) {
+                        const outerR = outerData[outerIndex];
+                        const outerG = outerData[outerIndex + 1];
+                        const outerB = outerData[outerIndex + 2];
+                        finalColor = (outerR << 16) | (outerG << 8) | outerB;
+                    }
+                }
+                
+                return finalColor;
+            }
+            
+            return 0xF4A460;
+        }
+
+        function updateVoxelModel() {
+            if (!voxelModel) return;
+            
+            voxelModel.children.forEach(bodyPartGroup => {
+                bodyPartGroup.children.forEach(voxel => {
+                    if (voxel.userData) {
+                        const { x, y, z } = voxel.userData;
+                        voxel.material.color.setHex(getVoxelColor(x, y, z));
+                    }
+                });
+            });
+        }
+
+        function setupEventListeners() {
+            // Tool events
+            document.getElementById('color-picker').addEventListener('change', (e) => {
+                currentColor = e.target.value;
+                document.getElementById('color-code-input').value = e.target.value;
+            });
+            
+            // Control buttons
+            document.getElementById('resetView').addEventListener('click', resetView);
+            document.getElementById('toggleMode').addEventListener('click', toggleMode);
+            document.getElementById('zoomIn').addEventListener('click', () => zoomCamera(0.9));
+            document.getElementById('zoomOut').addEventListener('click', () => zoomCamera(1.1));
+            
+            // Import file event
+            document.getElementById('import-skin').addEventListener('change', importSkin);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        function handleKeyboard(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'z':
+                        event.preventDefault();
+                        if (event.shiftKey) {
+                            redoAction();
+                        } else {
+                            undoAction();
+                        }
+                        break;
+                    case 'y':
+                        event.preventDefault();
+                        redoAction();
+                        break;
+                }
+            }
+            
+            switch (event.key) {
+                case 'p':
+                    setTool('pen');
+                    break;
+                case 'b':
+                    setTool('brush');
+                    break;
+                case 'i':
+                    setTool('eyedropper');
+                    break;
+                case 'r':
+                    setTool('rotate');
+                    break;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.querySelector('.skin-preview');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // Tool functions
+        function setTool(tool) {
+            currentTool = tool;
+            
+            document.querySelectorAll('[id^="tool-"]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`tool-${tool}`).classList.add('active');
+            
+            // Update status with tool descriptions
+            let toolDescription = '';
+            switch(tool) {
+                case 'pen':
+                    toolDescription = 'Pen Tool - draws with exact current color';
+                    break;
+                case 'brush':
+                    toolDescription = 'Brush Tool - draws with random brightness variations';
+                    break;
+                case 'eyedropper':
+                    toolDescription = 'Color Picker - click to pick colors from the model';
+                    break;
+                case 'rotate':
+                    toolDescription = 'Rotate View - drag to rotate the camera';
+                    break;
+            }
+            updateStatus(toolDescription);
+        }
+
+        // Layer functions - Combined visibility and editing
+        function toggleLayerEditAndVisibility(layer) {
+            // Toggle visibility
+            layerVisibility[layer] = !layerVisibility[layer];
+            
+            // If making layer visible, also set it as editing layer
+            if (layerVisibility[layer]) {
+                currentEditingLayer = layer;
+            } else {
+                // If hiding the current editing layer, switch to the other layer
+                if (currentEditingLayer === layer) {
+                    currentEditingLayer = layer === 'body' ? 'outer' : 'body';
+                    // Make sure the other layer is visible
+                    layerVisibility[currentEditingLayer] = true;
+                }
+            }
+            
+            updateLayerButtons();
+            updateLayerDisplay();
+            updateVoxelModel();
+            
+            const status = layerVisibility[layer] ? 'shown and selected for editing' : 'hidden';
+            updateStatus(`${layer} layer ${status}`);
+        }
+
+        // Pixel grid toggle function
+        function togglePixelGrid() {
+            showPixelGrid = !showPixelGrid;
+            updatePixelGridButton();
+            updateVoxelModel();
+            
+            const status = showPixelGrid ? 'shown' : 'hidden';
+            updateStatus(`Pixel grid ${status}`);
+        }
+
+        function updateLayerButtons() {
+            // Update layer buttons to show visibility and editing state
+            const bodyLayerBtn = document.getElementById('layer-body');
+            const outerLayerBtn = document.getElementById('layer-outer');
+            
+            // Body layer button
+            bodyLayerBtn.classList.toggle('visible', layerVisibility.body);
+            bodyLayerBtn.classList.toggle('editing', currentEditingLayer === 'body');
+            if (layerVisibility.body) {
+                bodyLayerBtn.textContent = '👁️ Body';
+            } else {
+                bodyLayerBtn.textContent = '👁️‍🗨️ Body';
+            }
+            
+            // Outer layer button
+            outerLayerBtn.classList.toggle('visible', layerVisibility.outer);
+            outerLayerBtn.classList.toggle('editing', currentEditingLayer === 'outer');
+            if (layerVisibility.outer) {
+                outerLayerBtn.textContent = '👁️ Outer';
+            } else {
+                outerLayerBtn.textContent = '👁️‍🗨️ Outer';
+            }
+        }
+
+        function updatePixelGridButton() {
+            const gridBtn = document.getElementById('pixel-grid-btn');
+            gridBtn.classList.toggle('visible', showPixelGrid);
+            if (showPixelGrid) {
+                gridBtn.textContent = '🔲 Grid';
+            } else {
+                gridBtn.textContent = '🔳 Grid';
+            }
+        }
+
+        function toggleBodyPart(partName) {
+            bodyPartsVisible[partName] = !bodyPartsVisible[partName];
+            
+            const btn = document.getElementById(`part-${partName}`);
+            const bodyPartGroup = voxelModel.getObjectByName(partName);
+            
+            if (bodyPartsVisible[partName]) {
+                btn.classList.remove('hidden');
+                if (bodyPartGroup) bodyPartGroup.visible = true;
+                updateStatus(`${partName} shown`);
+            } else {
+                btn.classList.add('hidden');
+                if (bodyPartGroup) bodyPartGroup.visible = false;
+                updateStatus(`${partName} hidden`);
+            }
+        }
+
+        function updateLayerDisplay() {
+            const indicator = document.getElementById('edit-mode-indicator');
+            
+            if (currentEditingLayer === 'body') {
+                indicator.textContent = 'Editing: Body Layer';
+                indicator.style.background = 'rgba(76, 175, 80, 0.9)';
+            } else {
+                indicator.textContent = 'Editing: Outer Layer';
+                indicator.style.background = 'rgba(255, 152, 0, 0.9)';
+            }
+        }
+
+        function toggleMode() {
+            isEditMode = !isEditMode;
+            
+            const toggleBtn = document.getElementById('toggleMode');
+            
+            if (isEditMode) {
+                toggleBtn.textContent = '👁️ View Mode';
+                renderer.domElement.style.cursor = 'crosshair';
+            } else {
+                toggleBtn.textContent = '🎨 Edit Mode';
+                renderer.domElement.style.cursor = 'grab';
+            }
+        }
+
+        function resetView() {
+            camera.position.set(3, 2, 3);
+            camera.lookAt(0, 1, 0);
+            updateCameraInfo();
+        }
+
+        function zoomCamera(factor) {
+            camera.position.multiplyScalar(factor);
+            
+            const distance = camera.position.length();
+            if (distance < 2) camera.position.setLength(2);
+            if (distance > 10) camera.position.setLength(10);
+            
+            updateCameraInfo();
+        }
+
+        // Color functions
+        function generateColorPalette() {
+            const paletteContainer = document.getElementById('color-palette');
+            paletteContainer.innerHTML = '';
+            
+            commonColors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.style.width = '30px';
+                swatch.style.height = '30px';
+                swatch.style.backgroundColor = color;
+                swatch.style.border = '2px solid #8b4513';
+                swatch.style.borderRadius = '3px';
+                swatch.style.cursor = 'pointer';
+                swatch.style.transition = 'transform 0.2s';
+                
+                swatch.addEventListener('click', () => {
+                    currentColor = color;
+                    document.getElementById('color-picker').value = color;
+                    document.getElementById('color-code-input').value = color;
+                    updateStatus(`Color selected: ${color}`);
+                });
+                
+                swatch.addEventListener('mouseenter', () => {
+                    swatch.style.transform = 'scale(1.1)';
+                });
+                
+                swatch.addEventListener('mouseleave', () => {
+                    swatch.style.transform = 'scale(1.0)';
+                });
+                
+                paletteContainer.appendChild(swatch);
+            });
+        }
+
+        function applyColorCode() {
+            const colorInput = document.getElementById('color-code-input');
+            let colorCode = colorInput.value.trim();
+            
+            // Validate and normalize color code
+            if (!colorCode.startsWith('#')) {
+                colorCode = '#' + colorCode;
+            }
+            
+            // Basic validation
+            if (/^#[0-9A-F]{6}$/i.test(colorCode)) {
+                currentColor = colorCode.toLowerCase();
+                document.getElementById('color-picker').value = currentColor;
+                updateStatus(`Color applied: ${currentColor}`);
+            } else {
+                updateStatus('Invalid color code! Use format: #RRGGBB');
+                colorInput.value = currentColor;
+            }
+        }
+
+        function fillRect(layer, x, y, w, h, color) {
+            const rgb = hexToRgb(color);
+            const data = layer === 'body' ? skinData.body : skinData.outer;
+            
+            for (let py = y; py < y + h; py++) {
+                for (let px = x; px < x + w; px++) {
+                    if (px >= 0 && px < 64 && py >= 0 && py < 64) {
+                        const index = (py * 64 + px) * 4;
+                        data[index] = rgb.r;
+                        data[index + 1] = rgb.g;
+                        data[index + 2] = rgb.b;
+                        data[index + 3] = 255;
+                    }
+                }
+            }
+        }
+
+        function setPixel(layer, x, y, color) {
+            const rgb = hexToRgb(color);
+            const data = layer === 'body' ? skinData.body : skinData.outer;
+            const index = (y * 64 + x) * 4;
+            
+            data[index] = rgb.r;
+            data[index + 1] = rgb.g;
+            data[index + 2] = rgb.b;
+            data[index + 3] = 255;
+        }
+
+        // Undo/Redo functions
+        function saveUndoState() {
+            const state = {
+                body: new Uint8ClampedArray(skinData.body),
+                outer: new Uint8ClampedArray(skinData.outer)
+            };
+            
+            undoStack.push(state);
+            
+            if (undoStack.length > MAX_UNDO_STEPS) {
+                undoStack.shift();
+            }
+            
+            redoStack = [];
+        }
+
+        function undoAction() {
+            if (undoStack.length === 0) {
+                updateStatus('Nothing to undo');
+                return;
+            }
+            
+            const currentState = {
+                body: new Uint8ClampedArray(skinData.body),
+                outer: new Uint8ClampedArray(skinData.outer)
+            };
+            redoStack.push(currentState);
+            
+            const previousState = undoStack.pop();
+            skinData.body.set(previousState.body);
+            skinData.outer.set(previousState.outer);
+            
+            updateVoxelModel();
+            updateStatus('Undo applied');
+        }
+
+        function redoAction() {
+            if (redoStack.length === 0) {
+                updateStatus('Nothing to redo');
+                return;
+            }
+            
+            saveUndoState();
+            undoStack.pop();
+            
+            const redoState = redoStack.pop();
+            skinData.body.set(redoState.body);
+            skinData.outer.set(redoState.outer);
+            
+            updateVoxelModel();
+            updateStatus('Redo applied');
+        }
+
+        function mirrorSkin() {
+            saveUndoState();
+            
+            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            const tempData = new Uint8ClampedArray(data);
+            
+            for (let y = 0; y < 64; y++) {
+                for (let x = 0; x < 32; x++) {
+                    const leftIndex = (y * 64 + x) * 4;
+                    const rightIndex = (y * 64 + (63 - x)) * 4;
+                    
+                    data[rightIndex] = tempData[leftIndex];
+                    data[rightIndex + 1] = tempData[leftIndex + 1];
+                    data[rightIndex + 2] = tempData[leftIndex + 2];
+                    data[rightIndex + 3] = tempData[leftIndex + 3];
+                }
+            }
+            
+            updateVoxelModel();
+            updateStatus('Skin mirrored');
+        }
+
+        function flipSkin() {
+            saveUndoState();
+            
+            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            const tempData = new Uint8ClampedArray(data);
+            
+            for (let y = 0; y < 32; y++) {
+                for (let x = 0; x < 64; x++) {
+                    const topIndex = (y * 64 + x) * 4;
+                    const bottomIndex = ((63 - y) * 64 + x) * 4;
+                    
+                    data[bottomIndex] = tempData[topIndex];
+                    data[bottomIndex + 1] = tempData[topIndex + 1];
+                    data[bottomIndex + 2] = tempData[topIndex + 2];
+                    data[bottomIndex + 3] = tempData[topIndex + 3];
+                    
+                    data[topIndex] = tempData[bottomIndex];
+                    data[topIndex + 1] = tempData[bottomIndex + 1];
+                    data[topIndex + 2] = tempData[bottomIndex + 2];
+                    data[topIndex + 3] = tempData[bottomIndex + 3];
+                }
+            }
+            
+            updateVoxelModel();
+            updateStatus('Skin flipped');
+        }
+
+        // File operations
+        function exportSkin() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            const bodyImageData = new ImageData(skinData.body, 64, 64);
+            const outerImageData = new ImageData(skinData.outer, 64, 64);
+            
+            ctx.putImageData(bodyImageData, 0, 0);
+            ctx.putImageData(outerImageData, 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = 'minecraft_skin_3d.png';
+            link.href = canvas.toDataURL();
+            link.click();
+            
+            updateStatus('3D skin exported successfully!');
+        }
+
+        function importSkin(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.drawImage(img, 0, 0, 64, 64);
+                const imageData = ctx.getImageData(0, 0, 64, 64);
+                
+                skinData.body.set(imageData.data);
+                skinData.outer.fill(0);
+                
+                updateVoxelModel();
+                updateStatus(`3D skin imported: ${file.name}`);
+            };
+            
+            img.src = URL.createObjectURL(file);
+            e.target.value = '';
+        }
+
+        function newSkin() {
+            if (confirm('Create a new skin? This will clear your current work.')) {
+                initSkinData();
+                updateVoxelModel();
+                updateStatus('New 3D skin created');
+            }
+        }
+
+        function clearSkin() {
+            if (confirm('Clear the current editing layer?')) {
+                const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+                
+                if (currentEditingLayer === 'body') {
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = 244;
+                        data[i + 1] = 164;
+                        data[i + 2] = 96;
+                        data[i + 3] = 255;
+                    }
+                } else {
+                    data.fill(0);
+                }
+                
+                updateVoxelModel();
+                updateStatus(`${currentEditingLayer} layer cleared`);
+            }
+        }
+
+        function updateCameraInfo() {
+            const distance = Math.round(camera.position.length() * 10) / 10;
+            const zoom = Math.round((4 / distance) * 100);
+            document.getElementById('camera-info').textContent = `Camera: ${isEditMode ? 'Edit' : 'View'} | Zoom: ${zoom}%`;
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status-text').textContent = message;
+            
+            // Update tool name mapping
+            const toolNames = {
+                'pen': 'Pen',
+                'brush': 'Brush', 
+                'eyedropper': 'Picker',
+                'rotate': 'Rotate'
+            };
+            
+            document.getElementById('pixel-info').textContent = `Editing: ${currentEditingLayer === 'body' ? 'Body' : 'Outer'} Layer | Tool: ${toolNames[currentTool]}`;
+        }
+
+        // Utility functions
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        console.log('🎮 Enhanced 3D Minecraft Skin Editor with grid layout loaded successfully!');
+    </script>
+
+
+</body></html>
