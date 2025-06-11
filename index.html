@@ -1,8 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 3D Skin Editor</title>
-    <link rel="icon" type="image/x-icon" href="icon.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
@@ -746,14 +745,12 @@
         
         <div class="main-content">
             <div class="left-panel">
-                <div class="panel-title">⚙️ Settings</div>
-
                 <div class="layer-controls">
                     <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">📋 Display Options</div>
                     <div class="layer-row">
-                        <button id="layer-body" class="layer-toggle-btn visible editing" onclick="toggleLayerEditAndVisibility('body')">👁️ Body</button>
-                        <button id="layer-outer" class="layer-toggle-btn" onclick="toggleLayerEditAndVisibility('outer')">👁️‍🗨️ Outer</button>
-                        <button id="pixel-grid-btn" class="layer-toggle-btn visible" onclick="togglePixelGrid()">🔲 Grid</button>
+                        <button id="layer-body" class="layer-toggle-btn visible" onclick="toggleLayerVisibility('body')">Body</button>
+                        <button id="layer-outer" class="layer-toggle-btn" onclick="toggleLayerVisibility('outer')">Outer</button>
+                        <button id="pixel-grid-btn" class="layer-toggle-btn visible" onclick="togglePixelGrid()">Grid</button>
                     </div>
                 </div>
 
@@ -783,8 +780,6 @@
             </div>
             
             <div class="center-panel">
-                <div class="panel-title">🎮 3D Skin Editor</div>
-                
                 <div class="viewer-container">
                     <div class="edit-mode-indicator" id="edit-mode-indicator">Editing: Body Layer</div>
                     <div class="skin-preview">
@@ -800,8 +795,6 @@
             </div>
             
             <div class="right-panel">
-                <div class="panel-title">🎨 Color Palette</div>
-                
                 <div class="layer-controls">
                     <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">🎯 Common Colors</div>
                     <div id="color-palette" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-bottom: 15px;">
@@ -843,7 +836,7 @@
     <script>
         // Global variables
         let scene, camera, renderer, controls;
-        let voxelModel, playerModel;
+        let skinModel, gridOverlay;
         let currentTool = 'pen';
         let currentEditingLayer = 'body';
         let currentColor = '#8B4513';
@@ -853,15 +846,17 @@
         // Layer visibility states
         let layerVisibility = {
             body: true,
-            outer: true
+            outer: false
         };
 
         // Interaction variables
         let mouse = new THREE.Vector2();
         let raycaster = new THREE.Raycaster();
-        let hoveredVoxel = null;
+        let hoveredFace = null;
         let isDragging = false;
+        let isRotating = false;
         let dragStart = new THREE.Vector2();
+        let lastPaintedVoxel = null; // Track the last painted voxel to prevent multiple paints
 
         // Skin data
         let skinData = {
@@ -901,11 +896,12 @@
             initSkinData();
             setupEventListeners();
             generateColorPalette();
-            createVoxelModel();
+            createSkinModel();
+            createGridOverlay();
             updateLayerDisplay();
             updateLayerButtons();
             updatePixelGridButton();
-            updateStatus('🎨 3D Skin Editor loaded - Click to paint!');
+            updateStatus('🎨 3D Skin Editor loaded - Start with an empty skin!');
         });
 
         function initScene() {
@@ -915,8 +911,8 @@
             scene.background = new THREE.Color(0x2a2a2a);
             
             camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(3, 2, 3);
-            camera.lookAt(0, 1, 0);
+            camera.position.set(5, 6, 5);
+            camera.lookAt(0, 6, 0);
             
             renderer = new THREE.WebGLRenderer({ 
                 canvas: document.getElementById('skinViewer'),
@@ -927,10 +923,10 @@
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             
             // Add lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
             directionalLight.position.set(5, 10, 5);
             directionalLight.castShadow = true;
             scene.add(directionalLight);
@@ -946,7 +942,6 @@
         }
 
         function setupCameraControls() {
-            let isRotating = false;
             const canvas = renderer.domElement;
             
             canvas.addEventListener('mousedown', onMouseDown);
@@ -964,17 +959,25 @@
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
             
             dragStart.copy(mouse);
+            isDragging = true;
+            lastPaintedVoxel = null; // Reset painted voxel tracking
             
-            if ((currentTool === 'pen' || currentTool === 'brush') && isEditMode) {
-                paintVoxel();
-            } else if (currentTool === 'eyedropper' && isEditMode) {
-                pickColor();
-            } else if (currentTool === 'rotate' || event.button === 2 || (isEditMode && event.shiftKey)) {
-                // Allow rotation in edit mode when shift is held, or always with rotate tool
+            // Right button (2) always rotates
+            if (event.button === 2) {
                 isRotating = true;
+                return;
             }
             
-            isDragging = true;
+            // Left button behavior
+            if (event.button === 0) {
+                if ((currentTool === 'pen' || currentTool === 'brush') && isEditMode) {
+                    paintFace();
+                } else if (currentTool === 'eyedropper' && isEditMode) {
+                    pickColor();
+                } else if (currentTool === 'rotate' || !isEditMode) {
+                    isRotating = true;
+                }
+            }
         }
 
         function onMouseMove(event) {
@@ -982,34 +985,39 @@
             mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
             
-            // Update raycasting for hover effects
-            if (isEditMode) {
-                updateVoxelHover();
+            // Update raycasting for hover effects (only in edit mode)
+            if (isEditMode && !isRotating) {
+                updateFaceHover();
             }
             
-            if (isDragging && (currentTool === 'rotate' || isRotating)) {
-                const deltaX = mouse.x - dragStart.x;
-                const deltaY = mouse.y - dragStart.y;
-                
-                // Rotate camera around target
-                const spherical = new THREE.Spherical();
-                spherical.setFromVector3(camera.position);
-                spherical.theta -= deltaX * 2;
-                spherical.phi += deltaY * 2;
-                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
-                
-                camera.position.setFromSpherical(spherical);
-                camera.lookAt(0, 1, 0);
-                
-                dragStart.copy(mouse);
-            } else if (isDragging && (currentTool === 'pen' || currentTool === 'brush') && isEditMode && !isRotating) {
-                paintVoxel();
+            if (isDragging) {
+                if (isRotating) {
+                    const deltaX = mouse.x - dragStart.x;
+                    const deltaY = mouse.y - dragStart.y;
+                    
+                    // Rotate camera around target
+                    const spherical = new THREE.Spherical();
+                    const targetPosition = new THREE.Vector3(0, 6, 0);
+                    const offset = camera.position.clone().sub(targetPosition);
+                    spherical.setFromVector3(offset);
+                    spherical.theta -= deltaX * 2;
+                    spherical.phi += deltaY * 2;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+                    
+                    camera.position.setFromSpherical(spherical).add(targetPosition);
+                    camera.lookAt(targetPosition);
+                    
+                    dragStart.copy(mouse);
+                } else if ((currentTool === 'pen' || currentTool === 'brush') && isEditMode) {
+                    paintFace();
+                }
             }
         }
 
         function onMouseUp(event) {
             isDragging = false;
             isRotating = false;
+            lastPaintedVoxel = null; // Reset when mouse is released
         }
 
         function onMouseWheel(event) {
@@ -1017,149 +1025,139 @@
             
             const zoomSpeed = 0.1;
             const direction = event.deltaY > 0 ? 1 : -1;
+            const targetPosition = new THREE.Vector3(0, 6, 0);
             
-            camera.position.multiplyScalar(1 + direction * zoomSpeed);
+            const offset = camera.position.clone().sub(targetPosition);
+            offset.multiplyScalar(1 + direction * zoomSpeed);
             
             // Limit zoom
-            const distance = camera.position.length();
-            if (distance < 2) camera.position.setLength(2);
-            if (distance > 10) camera.position.setLength(10);
+            const distance = offset.length();
+            if (distance < 3) offset.setLength(3);
+            if (distance > 12) offset.setLength(12);
+            
+            camera.position.copy(targetPosition).add(offset);
+            camera.lookAt(targetPosition);
             
             updateCameraInfo();
         }
 
-        function updateVoxelHover() {
+        function updateFaceHover() {
             raycaster.setFromCamera(mouse, camera);
             
-            if (voxelModel) {
-                const intersects = raycaster.intersectObjects(voxelModel.children, true);
+            if (skinModel) {
+                // Get all visible meshes from current editing layer only
+                const editingLayerMeshes = [];
+                
+                skinModel.children.forEach(layerGroup => {
+                    if (layerGroup.visible && layerGroup.name === `${currentEditingLayer}_layer`) {
+                        layerGroup.children.forEach(partGroup => {
+                            if (partGroup.visible) {
+                                partGroup.children.forEach(mesh => {
+                                    if (mesh.visible && mesh.material.opacity > 0) {
+                                        editingLayerMeshes.push(mesh);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                // Only intersect with current editing layer meshes
+                const intersects = raycaster.intersectObjects(editingLayerMeshes, false);
                 
                 // Clear previous hover
-                if (hoveredVoxel) {
-                    hoveredVoxel.material.emissive.setHex(0x000000);
-                    hoveredVoxel = null;
+                if (hoveredFace) {
+                    hoveredFace.material.emissive.setHex(0x000000);
+                    hoveredFace = null;
                 }
                 
+                // Hover the closest face from the current editing layer
                 if (intersects.length > 0) {
                     const intersect = intersects[0];
-                    const voxel = intersect.object;
+                    const face = intersect.object;
                     
-                    if (voxel.userData && voxel.userData.x !== undefined) {
-                        hoveredVoxel = voxel;
-                        voxel.material.emissive.setHex(0x404040);
+                    if (face.userData && face.userData.layer === currentEditingLayer) {
+                        hoveredFace = face;
+                        face.material.emissive.setHex(0x404040);
                     }
                 }
             }
         }
 
-        function paintVoxel() {
-            if (!hoveredVoxel || !hoveredVoxel.userData) return;
+        function paintFace() {
+            if (!hoveredFace || !hoveredFace.userData) return;
             
-            const x = hoveredVoxel.userData.x;
-            const y = hoveredVoxel.userData.y;
-            const z = hoveredVoxel.userData.z;
+            const { voxelX, voxelY, voxelZ, layer } = hoveredFace.userData;
             
-            // Save state for undo
-            saveUndoState();
+            // Only paint if it's the current editing layer
+            if (layer !== currentEditingLayer) return;
             
-            // Convert 3D position to 2D texture coordinates
-            const texCoords = voxelToTexture(x, y, z);
+            // Create unique voxel identifier to prevent multiple paints of the same voxel
+            const voxelId = `${voxelX},${voxelY},${voxelZ},${layer}`;
             
-            if (texCoords) {
-                if (currentTool === 'pen') {
-                    paintPixelPen(texCoords.x, texCoords.y);
-                } else if (currentTool === 'brush') {
-                    paintPixelBrush(texCoords.x, texCoords.y);
-                }
-                updateVoxelModel();
+            // Skip if we already painted this voxel in this paint session
+            if (lastPaintedVoxel === voxelId) return;
+            
+            // Save state for undo (only on first paint of a session)
+            if (lastPaintedVoxel === null) {
+                saveUndoState();
             }
+            
+            // Mark this voxel as painted
+            lastPaintedVoxel = voxelId;
+            
+            // Get proper texture coordinates for this specific voxel
+            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+            if (!texCoords) return;
+            
+            const { x: textureX, y: textureY } = texCoords;
+            
+            if (currentTool === 'pen') {
+                paintPixelPen(textureX, textureY);
+            } else if (currentTool === 'brush') {
+                paintPixelBrush(textureX, textureY);
+            }
+            
+            updateSkinTextures();
         }
 
         function pickColor() {
-            if (!hoveredVoxel || !hoveredVoxel.userData) return;
+            if (!hoveredFace || !hoveredFace.userData) return;
             
-            const x = hoveredVoxel.userData.x;
-            const y = hoveredVoxel.userData.y;
-            const z = hoveredVoxel.userData.z;
+            const { voxelX, voxelY, voxelZ, layer } = hoveredFace.userData;
             
-            const texCoords = voxelToTexture(x, y, z);
+            // Only pick from current editing layer
+            if (layer !== currentEditingLayer) return;
             
-            if (texCoords) {
-                const color = getPixelColor(texCoords.x, texCoords.y);
-                currentColor = color;
-                document.getElementById('color-picker').value = color;
-                document.getElementById('color-code-input').value = color;
-                updateStatus(`Color picked: ${color}`);
-            }
-        }
-
-        function voxelToTexture(voxelX, voxelY, voxelZ) {
-            // Simplified mapping for demonstration
-            if (voxelY >= 6 && voxelY <= 8) { // Head area
-                return {
-                    x: Math.floor(8 + (voxelX + 4) * 8/8),
-                    y: Math.floor(8 + (8 - voxelY) * 8/8)
-                };
-            }
+            // Get proper texture coordinates for this specific voxel
+            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+            if (!texCoords) return;
             
-            if (voxelY >= 2 && voxelY <= 6) { // Body area
-                return {
-                    x: Math.floor(20 + (voxelX + 4) * 8/8),
-                    y: Math.floor(20 + (6 - voxelY) * 12/4)
-                };
-            }
+            const { x: textureX, y: textureY } = texCoords;
             
-            return {
-                x: Math.floor((voxelX + 32) % 64),
-                y: Math.floor((voxelZ + 32) % 64)
-            };
+            const color = getPixelColor(textureX, textureY, layer);
+            
+            currentColor = color;
+            document.getElementById('color-picker').value = color;
+            document.getElementById('color-code-input').value = color;
+            updateStatus(`Color picked: ${color}`);
         }
 
         function initSkinData() {
-            // Initialize body layer with default skin colors
+            // Initialize both layers as completely transparent/empty
             for (let i = 0; i < skinData.body.length; i += 4) {
-                skinData.body[i] = 244;     // R
-                skinData.body[i + 1] = 164; // G
-                skinData.body[i + 2] = 96;  // B
-                skinData.body[i + 3] = 255; // A
+                skinData.body[i] = 0;        // R
+                skinData.body[i + 1] = 0;    // G
+                skinData.body[i + 2] = 0;    // B
+                skinData.body[i + 3] = 0;    // A (transparent)
             }
             
-            // Initialize outer layer as transparent
             for (let i = 0; i < skinData.outer.length; i += 4) {
-                skinData.outer[i] = 0;      // R
-                skinData.outer[i + 1] = 0;  // G
-                skinData.outer[i + 2] = 0;  // B
-                skinData.outer[i + 3] = 0;  // A (transparent)
+                skinData.outer[i] = 0;       // R
+                skinData.outer[i + 1] = 0;   // G
+                skinData.outer[i + 2] = 0;   // B
+                skinData.outer[i + 3] = 0;   // A (transparent)
             }
-            
-            loadDefaultSkin();
-        }
-
-        function loadDefaultSkin() {
-            // Head - brown hair
-            fillRect('body', 8, 0, 8, 8, '#8B4513');
-            fillRect('body', 0, 8, 32, 8, '#8B4513');
-            
-            // Face
-            fillRect('body', 8, 8, 8, 8, '#F4A460');
-            setPixel('body', 10, 10, '#000000'); // Eyes
-            setPixel('body', 13, 10, '#000000');
-            setPixel('body', 11, 13, '#8B4513'); // Mouth
-            setPixel('body', 12, 13, '#8B4513');
-            
-            // Body - blue shirt
-            fillRect('body', 20, 20, 8, 12, '#0000FF');
-            fillRect('body', 16, 20, 4, 12, '#0000FF');
-            fillRect('body', 28, 20, 4, 12, '#0000FF');
-            fillRect('body', 32, 20, 8, 12, '#0000FF');
-            
-            // Arms - skin color
-            fillRect('body', 44, 20, 12, 12, '#F4A460');
-            fillRect('body', 36, 52, 16, 12, '#F4A460');
-            
-            // Legs - brown pants
-            fillRect('body', 4, 20, 12, 12, '#654321');
-            fillRect('body', 20, 52, 12, 12, '#654321');
         }
 
         // Pen tool - draws with exact current color
@@ -1203,177 +1201,453 @@
             data[index + 3] = 255;
         }
 
-        function getPixelColor(x, y) {
+        function getPixelColor(x, y, layer) {
             if (x < 0 || x >= 64 || y < 0 || y >= 64) return '#000000';
             
-            const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+            const data = layer === 'body' ? skinData.body : skinData.outer;
             const index = (y * 64 + x) * 4;
             
             const r = data[index];
             const g = data[index + 1];
             const b = data[index + 2];
+            const a = data[index + 3];
+            
+            if (a === 0) return '#000000'; // Transparent pixel
             
             return rgbToHex(r, g, b);
         }
 
-        function createVoxelModel() {
-            voxelModel = new THREE.Group();
-            createBodyPartVoxels();
-            scene.add(voxelModel);
-        }
-
-        function createBodyPartVoxels() {
-            const voxelSize = 0.125;
-            const voxelGeo = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize);
+        function createSkinModel() {
+            skinModel = new THREE.Group();
             
-            // Create body parts with proper grouping
-            const headGroup = new THREE.Group();
+            // Create body and outer layer groups
             const bodyGroup = new THREE.Group();
-            const leftArmGroup = new THREE.Group();
-            const rightArmGroup = new THREE.Group();
-            const leftLegGroup = new THREE.Group();
-            const rightLegGroup = new THREE.Group();
+            const outerGroup = new THREE.Group();
             
-            // Head voxels
-            for (let x = -4; x < 4; x++) {
-                for (let y = 0; y < 8; y++) {
-                    for (let z = -4; z < 4; z++) {
-                        const voxel = createVoxel(x, y + 6, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'head';
-                        headGroup.add(voxel);
-                    }
-                }
-            }
+            // Create surface meshes for body parts - only surface voxels
+            createBodyPartSurfaces(bodyGroup, 'body', 1.0);
+            createBodyPartSurfaces(outerGroup, 'outer', 1.25); // 25% larger for proper clothing effect
             
-            // Body voxels
-            for (let x = -4; x < 4; x++) {
-                for (let y = 0; y < 12; y++) {
-                    for (let z = -2; z < 2; z++) {
-                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'body';
-                        bodyGroup.add(voxel);
-                    }
-                }
-            }
+            bodyGroup.name = 'body_layer';
+            outerGroup.name = 'outer_layer';
             
-            // Right arm voxels
-            for (let x = -6; x < -2; x++) {
-                for (let y = 0; y < 12; y++) {
-                    for (let z = -2; z < 2; z++) {
-                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'rightarm';
-                        rightArmGroup.add(voxel);
-                    }
-                }
-            }
+            skinModel.add(bodyGroup);
+            skinModel.add(outerGroup);
             
-            // Left arm voxels
-            for (let x = 2; x < 6; x++) {
-                for (let y = 0; y < 12; y++) {
-                    for (let z = -2; z < 2; z++) {
-                        const voxel = createVoxel(x, y - 6, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'leftarm';
-                        leftArmGroup.add(voxel);
-                    }
-                }
-            }
-            
-            // Right leg voxels
-            for (let x = -2; x < 0; x++) {
-                for (let y = 0; y < 12; y++) {
-                    for (let z = -2; z < 2; z++) {
-                        const voxel = createVoxel(x, y - 18, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'rightleg';
-                        rightLegGroup.add(voxel);
-                    }
-                }
-            }
-            
-            // Left leg voxels
-            for (let x = 0; x < 2; x++) {
-                for (let y = 0; y < 12; y++) {
-                    for (let z = -2; z < 2; z++) {
-                        const voxel = createVoxel(x, y - 18, z, voxelGeo, voxelSize);
-                        voxel.userData.bodyPart = 'leftleg';
-                        leftLegGroup.add(voxel);
-                    }
-                }
-            }
-            
-            // Add groups to main model with names for easy access
-            headGroup.name = 'head';
-            bodyGroup.name = 'body';
-            leftArmGroup.name = 'leftarm';
-            rightArmGroup.name = 'rightarm';
-            leftLegGroup.name = 'leftleg';
-            rightLegGroup.name = 'rightleg';
-            
-            voxelModel.add(headGroup);
-            voxelModel.add(bodyGroup);
-            voxelModel.add(leftArmGroup);
-            voxelModel.add(rightArmGroup);
-            voxelModel.add(leftLegGroup);
-            voxelModel.add(rightLegGroup);
+            scene.add(skinModel);
         }
 
-        function createVoxel(x, y, z, geometry, voxelSize) {
-            const material = new THREE.MeshLambertMaterial({
-                color: getVoxelColor(x, y, z),
-                transparent: true
+        function createBodyPartSurfaces(parentGroup, layer, scale) {
+            // Head surfaces (8x8x8) - only surface voxels
+            const headGroup = createPartSurfaces('head', -4, 4, 50, 58, -4, 4, layer, scale);
+            
+            // Body surfaces (8x12x4) - only surface voxels  
+            const bodyGroup = createPartSurfaces('body', -4, 4, 38, 50, -2, 2, layer, scale);
+            
+            // Right arm surfaces (4x12x4) - only surface voxels
+            const rightArmGroup = createPartSurfaces('rightarm', -7, -3, 38, 50, -2, 2, layer, scale);
+            
+            // Left arm surfaces (4x12x4) - only surface voxels
+            const leftArmGroup = createPartSurfaces('leftarm', 3, 7, 38, 50, -2, 2, layer, scale);
+            
+            // Right leg surfaces (4x12x4) - only surface voxels
+            const rightLegGroup = createPartSurfaces('rightleg', -4, 0, 26, 38, -2, 2, layer, scale);
+            
+            // Left leg surfaces (4x12x4) - only surface voxels
+            const leftLegGroup = createPartSurfaces('leftleg', 0, 4, 26, 38, -2, 2, layer, scale);
+            
+            parentGroup.add(headGroup);
+            parentGroup.add(bodyGroup);
+            parentGroup.add(rightArmGroup);
+            parentGroup.add(leftArmGroup);
+            parentGroup.add(rightLegGroup);
+            parentGroup.add(leftLegGroup);
+        }
+
+        function createPartSurfaces(partName, xMin, xMax, yMin, yMax, zMin, zMax, layer, scale) {
+            const partGroup = new THREE.Group();
+            partGroup.name = `${partName}_${layer}`;
+            
+            const voxelSize = 0.125 * scale;
+            
+            // For outer layer, we need to offset the position to be centered around the body
+            const offsetMultiplier = layer === 'outer' ? (scale - 1.0) / 2.0 : 0;
+            
+            // Create only surface voxels - check if voxel is on the boundary
+            for (let x = xMin; x < xMax; x++) {
+                for (let y = yMin; y < yMax; y++) {
+                    for (let z = zMin; z < zMax; z++) {
+                        // Check if voxel is on any surface (boundary)
+                        if (isOnSurface(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)) {
+                            createVoxelSurfaces(partGroup, x, y, z, voxelSize, layer, partName, offsetMultiplier);
+                        }
+                    }
+                }
+            }
+            
+            return partGroup;
+        }
+
+        function isOnSurface(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax) {
+            // A voxel is on the surface if it's on any boundary
+            return (
+                x === xMin || x === xMax - 1 ||  // Left or right face
+                y === yMin || y === yMax - 1 ||  // Bottom or top face
+                z === zMin || z === zMax - 1     // Front or back face
+            );
+        }
+
+        function createVoxelSurfaces(parentGroup, voxelX, voxelY, voxelZ, voxelSize, layer, partName, offsetMultiplier = 0) {
+            // Get texture coordinates for this specific voxel
+            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+            if (!texCoords) return;
+            
+            const { x: textureX, y: textureY } = texCoords;
+            
+            // Create 6 face geometries but only show faces that are actually on the surface
+            const faceGeometry = new THREE.PlaneGeometry(voxelSize, voxelSize);
+            
+            // Define face positions and rotations
+            const faces = [
+                { pos: [voxelSize/2, 0, 0], rot: [0, Math.PI/2, 0], name: 'right' },
+                { pos: [-voxelSize/2, 0, 0], rot: [0, -Math.PI/2, 0], name: 'left' },
+                { pos: [0, voxelSize/2, 0], rot: [-Math.PI/2, 0, 0], name: 'top' },
+                { pos: [0, -voxelSize/2, 0], rot: [Math.PI/2, 0, 0], name: 'bottom' },
+                { pos: [0, 0, voxelSize/2], rot: [0, 0, 0], name: 'front' },
+                { pos: [0, 0, -voxelSize/2], rot: [0, Math.PI, 0], name: 'back' }
+            ];
+            
+            faces.forEach(face => {
+                // Get material properties based on layer and texture data
+                const materialProps = getVoxelMaterial(textureX, textureY, layer);
+                
+                const material = new THREE.MeshLambertMaterial({
+                    color: materialProps.color,
+                    transparent: true,
+                    opacity: materialProps.opacity,
+                    side: THREE.DoubleSide
+                });
+                
+                const faceMesh = new THREE.Mesh(faceGeometry, material);
+                
+                // FIXED: Position faces at the center of each grid cell
+                // Convert voxel coordinates to world coordinates and center within grid cell
+                const baseX = (voxelX + 0.5) * 0.125; // +0.5 centers the voxel in its grid cell
+                const baseY = (voxelY + 0.5) * 0.125;
+                const baseZ = (voxelZ + 0.5) * 0.125;
+                
+                // Apply offset for outer layer to make it surround the body layer
+                const offsetX = offsetMultiplier * Math.sign(baseX || 1);
+                const offsetY = offsetMultiplier * Math.sign(baseY || 1);
+                const offsetZ = offsetMultiplier * Math.sign(baseZ || 1);
+                
+                faceMesh.position.set(
+                    baseX + face.pos[0] + offsetX,
+                    baseY + face.pos[1] + offsetY,
+                    baseZ + face.pos[2] + offsetZ
+                );
+                
+                faceMesh.rotation.set(face.rot[0], face.rot[1], face.rot[2]);
+                
+                faceMesh.userData = {
+                    textureX,
+                    textureY,
+                    layer,
+                    partName,
+                    voxelX,
+                    voxelY,
+                    voxelZ,
+                    face: face.name
+                };
+                
+                parentGroup.add(faceMesh);
             });
-            
-            const voxel = new THREE.Mesh(geometry, material);
-            voxel.position.set(x * voxelSize, y * voxelSize, z * voxelSize);
-            voxel.userData = { x, y, z };
-            
-            return voxel;
         }
 
-        function getVoxelColor(x, y, z) {
-            const texCoords = voxelToTexture(x, y, z);
+        function getVoxelMaterial(textureX, textureY, layer) {
+            const data = layer === 'body' ? skinData.body : skinData.outer;
+            const index = (textureY * 64 + textureX) * 4;
             
-            if (texCoords) {
-                // Combine colors from both layers if both are visible
-                let finalColor = 0xF4A460; // Default skin color
-                
-                if (layerVisibility.body) {
-                    const bodyData = skinData.body;
-                    const bodyIndex = (texCoords.y * 64 + texCoords.x) * 4;
-                    const bodyR = bodyData[bodyIndex];
-                    const bodyG = bodyData[bodyIndex + 1];
-                    const bodyB = bodyData[bodyIndex + 2];
-                    finalColor = (bodyR << 16) | (bodyG << 8) | bodyB;
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+            const a = data[index + 3];
+            
+            if (a === 0) {
+                // Empty pixel
+                if (layer === 'outer') {
+                    // For outer layer, completely transparent when empty
+                    return {
+                        color: 0x000000,
+                        opacity: 0.0
+                    };
+                } else {
+                    // For body layer, show grid when empty
+                    return {
+                        color: showPixelGrid ? 0x404040 : 0x202020,
+                        opacity: showPixelGrid ? 0.2 : 0.0
+                    };
                 }
-                
-                if (layerVisibility.outer) {
-                    const outerData = skinData.outer;
-                    const outerIndex = (texCoords.y * 64 + texCoords.x) * 4;
-                    const outerA = outerData[outerIndex + 3];
-                    
-                    // If outer layer has non-transparent pixel, use it
-                    if (outerA > 0) {
-                        const outerR = outerData[outerIndex];
-                        const outerG = outerData[outerIndex + 1];
-                        const outerB = outerData[outerIndex + 2];
-                        finalColor = (outerR << 16) | (outerG << 8) | outerB;
-                    }
-                }
-                
-                return finalColor;
             }
             
-            return 0xF4A460;
+            return {
+                color: (r << 16) | (g << 8) | b,
+                opacity: 1.0
+            };
         }
 
-        function updateVoxelModel() {
-            if (!voxelModel) return;
+        // Fixed texture coordinate mapping function
+        function getVoxelTextureCoords(voxelX, voxelY, voxelZ) {
+            // Map 3D voxel coordinates to proper 2D texture coordinates
+            // This is crucial for correct pixel painting
             
-            voxelModel.children.forEach(bodyPartGroup => {
-                bodyPartGroup.children.forEach(voxel => {
-                    if (voxel.userData) {
-                        const { x, y, z } = voxel.userData;
-                        voxel.material.color.setHex(getVoxelColor(x, y, z));
+            // Head area (Y: 50-57, 8 units tall)
+            if (voxelY >= 50 && voxelY <= 57) {
+                // Head front face mapping
+                const localX = voxelX + 4; // Convert to 0-7 range
+                const localY = 57 - voxelY; // Convert to 0-7 range (flip Y)
+                return {
+                    x: 8 + localX,
+                    y: 8 + localY
+                };
+            }
+            
+            // Body area (Y: 38-49, 12 units tall)
+            if (voxelY >= 38 && voxelY <= 49) {
+                // Body front face mapping
+                const localX = voxelX + 4; // Convert to 0-7 range
+                const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
+                return {
+                    x: 20 + localX,
+                    y: 20 + localY
+                };
+            }
+            
+            // Legs area (Y: 26-37, 12 units tall)
+            if (voxelY >= 26 && voxelY <= 37) {
+                // Right leg (X: -4 to -1) and Left leg (X: 0 to 3)
+                if (voxelX >= -4 && voxelX <= -1) {
+                    // Right leg front face mapping
+                    const localX = voxelX + 4; // Convert to 0-3 range
+                    const localY = 37 - voxelY; // Convert to 0-11 range (flip Y)
+                    return {
+                        x: 4 + localX,
+                        y: 20 + localY
+                    };
+                } else if (voxelX >= 0 && voxelX <= 3) {
+                    // Left leg front face mapping
+                    const localX = voxelX; // Already 0-3 range
+                    const localY = 37 - voxelY; // Convert to 0-11 range (flip Y)
+                    return {
+                        x: 20 + localX,
+                        y: 52 + localY
+                    };
+                }
+            }
+            
+            // Arms area (Y: 38-49, 12 units tall)
+            if (voxelY >= 38 && voxelY <= 49) {
+                // Right arm (X: -7 to -4) and Left arm (X: 3 to 6)
+                if (voxelX >= -7 && voxelX <= -4) {
+                    // Right arm front face mapping
+                    const localX = voxelX + 7; // Convert to 0-3 range
+                    const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
+                    return {
+                        x: 44 + localX,
+                        y: 20 + localY
+                    };
+                } else if (voxelX >= 3 && voxelX <= 6) {
+                    // Left arm front face mapping
+                    const localX = voxelX - 3; // Convert to 0-3 range
+                    const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
+                    return {
+                        x: 36 + localX,
+                        y: 52 + localY
+                    };
+                }
+            }
+            
+            // Default fallback
+            return {
+                x: Math.max(0, Math.min(63, Math.floor(voxelX + 32))),
+                y: Math.max(0, Math.min(63, Math.floor(voxelZ + 32)))
+            };
+        }
+
+        function getVoxelFaceColor(textureX, textureY, layer) {
+            const data = layer === 'body' ? skinData.body : skinData.outer;
+            const index = (textureY * 64 + textureX) * 4;
+            
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
+            const a = data[index + 3];
+            
+            if (a === 0) {
+                // Empty pixel - show grid color only for body layer
+                if (layer === 'outer') {
+                    return 0x000000; // Invisible for outer layer
+                }
+                return showPixelGrid ? 0x404040 : 0x202020;
+            }
+            
+            return (r << 16) | (g << 8) | b;
+        }
+
+        function getVoxelFaceOpacity(textureX, textureY, layer) {
+            const data = layer === 'body' ? skinData.body : skinData.outer;
+            const index = (textureY * 64 + textureX) * 4;
+            const a = data[index + 3];
+            
+            if (a === 0) {
+                // Empty pixel
+                if (layer === 'outer') {
+                    return 0.0; // Completely transparent for outer layer
+                }
+                return showPixelGrid ? 0.2 : 0.0; // Faint for body layer grid
+            }
+            
+            return 1.0;
+        }
+
+        function createGridOverlay() {
+            gridOverlay = new THREE.Group();
+            
+            if (showPixelGrid) {
+                // Only show grid for visible layers
+                if (layerVisibility.body) {
+                    const gridMaterial = new THREE.LineBasicMaterial({ 
+                        color: 0xffffff, 
+                        transparent: true, 
+                        opacity: 0.6,
+                        linewidth: 2
+                    });
+                    
+                    // Create wireframe grids for body layer - only surface boundaries
+                    createPartGrid('head_body', -4, 4, 50, 58, -4, 4, gridMaterial, 1.0, false);
+                    createPartGrid('body_body', -4, 4, 38, 50, -2, 2, gridMaterial, 1.0, false);
+                    createPartGrid('rightarm_body', -7, -3, 38, 50, -2, 2, gridMaterial, 1.0, false);
+                    createPartGrid('leftarm_body', 3, 7, 38, 50, -2, 2, gridMaterial, 1.0, false);
+                    createPartGrid('rightleg_body', -4, 0, 26, 38, -2, 2, gridMaterial, 1.0, false);
+                    createPartGrid('leftleg_body', 0, 4, 26, 38, -2, 2, gridMaterial, 1.0, false);
+                }
+                
+                // Only show outer grid when outer layer is visible
+                if (layerVisibility.outer) {
+                    const outerGridMaterial = new THREE.LineBasicMaterial({ 
+                        color: 0xff6600, // Orange color for outer layer grid
+                        transparent: true, 
+                        opacity: 0.4,
+                        linewidth: 1
+                    });
+                    
+                    createPartGrid('head_outer', -4, 4, 50, 58, -4, 4, outerGridMaterial, 1.25, true);
+                    createPartGrid('body_outer', -4, 4, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
+                    createPartGrid('rightarm_outer', -7, -3, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
+                    createPartGrid('leftarm_outer', 3, 7, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
+                    createPartGrid('rightleg_outer', -4, 0, 26, 38, -2, 2, outerGridMaterial, 1.25, true);
+                    createPartGrid('leftleg_outer', 0, 4, 26, 38, -2, 2, outerGridMaterial, 1.25, true);
+                }
+            }
+            
+            scene.add(gridOverlay);
+        }
+
+        function createPartGrid(partName, xMin, xMax, yMin, yMax, zMin, zMax, material, scale, isOuter = false) {
+            const voxelSize = 0.125 * scale;
+            const partGrid = new THREE.Group();
+            partGrid.name = `grid_${partName}`;
+            
+            // For outer layer grid, apply same offset as the voxels
+            const offsetMultiplier = isOuter ? (scale - 1.0) / 2.0 : 0;
+            
+            // FIXED: Create grid lines that align with voxel centers
+            // Grid lines should be positioned to form the boundaries of voxel cells
+            for (let x = xMin; x <= xMax; x++) {
+                for (let y = yMin; y <= yMax; y++) {
+                    // Convert voxel coordinates to world coordinates (centered)
+                    const baseX = x * 0.125;
+                    const baseY = y * 0.125;
+                    const offsetX = isOuter ? offsetMultiplier * Math.sign(baseX || 1) : 0;
+                    const offsetY = isOuter ? offsetMultiplier * Math.sign(baseY || 1) : 0;
+                    
+                    // Z lines only on front and back faces
+                    if ((x === xMin || x === xMax) || (y === yMin || y === yMax)) {
+                        const zMinOffset = isOuter ? offsetMultiplier * Math.sign(zMin * 0.125 || 1) : 0;
+                        const zMaxOffset = isOuter ? offsetMultiplier * Math.sign(zMax * 0.125 || 1) : 0;
+                        
+                        const zGeometry = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(baseX + offsetX, baseY + offsetY, zMin * 0.125 + zMinOffset),
+                            new THREE.Vector3(baseX + offsetX, baseY + offsetY, zMax * 0.125 + zMaxOffset)
+                        ]);
+                        partGrid.add(new THREE.Line(zGeometry, material));
                     }
+                }
+                
+                for (let z = zMin; z <= zMax; z++) {
+                    const baseX = x * 0.125;
+                    const baseZ = z * 0.125;
+                    const offsetX = isOuter ? offsetMultiplier * Math.sign(baseX || 1) : 0;
+                    const offsetZ = isOuter ? offsetMultiplier * Math.sign(baseZ || 1) : 0;
+                    
+                    // Y lines only on side faces
+                    if ((x === xMin || x === xMax) || (z === zMin || z === zMax)) {
+                        const yMinOffset = isOuter ? offsetMultiplier * Math.sign(yMin * 0.125 || 1) : 0;
+                        const yMaxOffset = isOuter ? offsetMultiplier * Math.sign(yMax * 0.125 || 1) : 0;
+                        
+                        const yGeometry = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(baseX + offsetX, yMin * 0.125 + yMinOffset, baseZ + offsetZ),
+                            new THREE.Vector3(baseX + offsetX, yMax * 0.125 + yMaxOffset, baseZ + offsetZ)
+                        ]);
+                        partGrid.add(new THREE.Line(yGeometry, material));
+                    }
+                }
+            }
+            
+            for (let y = yMin; y <= yMax; y++) {
+                for (let z = zMin; z <= zMax; z++) {
+                    const baseY = y * 0.125;
+                    const baseZ = z * 0.125;
+                    const offsetY = isOuter ? offsetMultiplier * Math.sign(baseY || 1) : 0;
+                    const offsetZ = isOuter ? offsetMultiplier * Math.sign(baseZ || 1) : 0;
+                    
+                    // X lines only on top/bottom faces
+                    if ((y === yMin || y === yMax) || (z === zMin || z === zMax)) {
+                        const xMinOffset = isOuter ? offsetMultiplier * Math.sign(xMin * 0.125 || 1) : 0;
+                        const xMaxOffset = isOuter ? offsetMultiplier * Math.sign(xMax * 0.125 || 1) : 0;
+                        
+                        const xGeometry = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(xMin * 0.125 + xMinOffset, baseY + offsetY, baseZ + offsetZ),
+                            new THREE.Vector3(xMax * 0.125 + xMaxOffset, baseY + offsetY, baseZ + offsetZ)
+                        ]);
+                        partGrid.add(new THREE.Line(xGeometry, material));
+                    }
+                }
+            }
+            
+            gridOverlay.add(partGrid);
+        }
+
+        function updateSkinTextures() {
+            if (!skinModel) return;
+            
+            // Update all face materials
+            skinModel.children.forEach(layerGroup => {
+                layerGroup.children.forEach(partGroup => {
+                    partGroup.children.forEach(face => {
+                        if (face.userData) {
+                            const { voxelX, voxelY, voxelZ, layer } = face.userData;
+                            
+                            // Get proper texture coordinates for this voxel
+                            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+                            if (texCoords) {
+                                const material = getVoxelMaterial(texCoords.x, texCoords.y, layer);
+                                face.material.color.setHex(material.color);
+                                face.material.opacity = material.opacity;
+                                face.visible = material.opacity > 0 || layerVisibility[layer];
+                            }
+                        }
+                    });
                 });
             });
         }
@@ -1453,6 +1727,14 @@
             });
             document.getElementById(`tool-${tool}`).classList.add('active');
             
+            // Update cursor based on tool and mode
+            const canvas = renderer.domElement;
+            if (tool === 'rotate' || !isEditMode) {
+                canvas.style.cursor = 'grab';
+            } else {
+                canvas.style.cursor = 'crosshair';
+            }
+            
             // Update status with tool descriptions
             let toolDescription = '';
             switch(tool) {
@@ -1472,88 +1754,109 @@
             updateStatus(toolDescription);
         }
 
-        // Layer functions - Combined visibility and editing
-        function toggleLayerEditAndVisibility(layer) {
-            // Toggle visibility
+        // Layer functions
+        function toggleLayerVisibility(layer) {
             layerVisibility[layer] = !layerVisibility[layer];
             
-            // If making layer visible, also set it as editing layer
-            if (layerVisibility[layer]) {
-                currentEditingLayer = layer;
-            } else {
-                // If hiding the current editing layer, switch to the other layer
-                if (currentEditingLayer === layer) {
-                    currentEditingLayer = layer === 'body' ? 'outer' : 'body';
-                    // Make sure the other layer is visible
-                    layerVisibility[currentEditingLayer] = true;
-                }
-            }
+            // Update current editing layer based on visible layers
+            updateCurrentEditingLayer();
             
             updateLayerButtons();
             updateLayerDisplay();
-            updateVoxelModel();
+            updateLayerVisibility3D();
+            updateGridOverlay(); // This will now show/hide grids based on layer visibility
             
-            const status = layerVisibility[layer] ? 'shown and selected for editing' : 'hidden';
+            const status = layerVisibility[layer] ? 'shown' : 'hidden';
             updateStatus(`${layer} layer ${status}`);
+        }
+
+        function updateCurrentEditingLayer() {
+            // Determine which layer should be edited based on visibility
+            // Priority: outer layer if visible, otherwise body layer if visible
+            if (layerVisibility.outer) {
+                currentEditingLayer = 'outer';
+            } else if (layerVisibility.body) {
+                currentEditingLayer = 'body';
+            } else {
+                // If no layers are visible, default to body
+                currentEditingLayer = 'body';
+                layerVisibility.body = true; // Force body layer visible
+            }
+        }
+
+        function updateLayerVisibility3D() {
+            if (!skinModel) return;
+            
+            skinModel.children.forEach(layerGroup => {
+                if (layerGroup.name === 'body_layer') {
+                    layerGroup.visible = layerVisibility.body;
+                } else if (layerGroup.name === 'outer_layer') {
+                    layerGroup.visible = layerVisibility.outer;
+                }
+            });
+            
+            updateSkinTextures();
         }
 
         // Pixel grid toggle function
         function togglePixelGrid() {
             showPixelGrid = !showPixelGrid;
             updatePixelGridButton();
-            updateVoxelModel();
+            updateGridOverlay(); // This will show/hide grids based on layer visibility and grid setting
+            updateSkinTextures();
             
             const status = showPixelGrid ? 'shown' : 'hidden';
             updateStatus(`Pixel grid ${status}`);
         }
 
+        function updateGridOverlay() {
+            if (gridOverlay) {
+                scene.remove(gridOverlay);
+            }
+            createGridOverlay();
+        }
+
         function updateLayerButtons() {
-            // Update layer buttons to show visibility and editing state
+            // Update layer buttons to show only visibility state
             const bodyLayerBtn = document.getElementById('layer-body');
             const outerLayerBtn = document.getElementById('layer-outer');
             
             // Body layer button
             bodyLayerBtn.classList.toggle('visible', layerVisibility.body);
-            bodyLayerBtn.classList.toggle('editing', currentEditingLayer === 'body');
-            if (layerVisibility.body) {
-                bodyLayerBtn.textContent = '👁️ Body';
-            } else {
-                bodyLayerBtn.textContent = '👁️‍🗨️ Body';
-            }
+            bodyLayerBtn.classList.remove('editing');
+            bodyLayerBtn.textContent = 'Body';
             
             // Outer layer button
             outerLayerBtn.classList.toggle('visible', layerVisibility.outer);
-            outerLayerBtn.classList.toggle('editing', currentEditingLayer === 'outer');
-            if (layerVisibility.outer) {
-                outerLayerBtn.textContent = '👁️ Outer';
-            } else {
-                outerLayerBtn.textContent = '👁️‍🗨️ Outer';
-            }
+            outerLayerBtn.classList.remove('editing');
+            outerLayerBtn.textContent = 'Outer';
         }
 
         function updatePixelGridButton() {
             const gridBtn = document.getElementById('pixel-grid-btn');
             gridBtn.classList.toggle('visible', showPixelGrid);
-            if (showPixelGrid) {
-                gridBtn.textContent = '🔲 Grid';
-            } else {
-                gridBtn.textContent = '🔳 Grid';
-            }
+            gridBtn.textContent = 'Grid';
         }
 
         function toggleBodyPart(partName) {
             bodyPartsVisible[partName] = !bodyPartsVisible[partName];
             
             const btn = document.getElementById(`part-${partName}`);
-            const bodyPartGroup = voxelModel.getObjectByName(partName);
+            
+            // Toggle visibility for both layers of this body part
+            skinModel.children.forEach(layerGroup => {
+                layerGroup.children.forEach(partGroup => {
+                    if (partGroup.name.includes(partName)) {
+                        partGroup.visible = bodyPartsVisible[partName];
+                    }
+                });
+            });
             
             if (bodyPartsVisible[partName]) {
                 btn.classList.remove('hidden');
-                if (bodyPartGroup) bodyPartGroup.visible = true;
                 updateStatus(`${partName} shown`);
             } else {
                 btn.classList.add('hidden');
-                if (bodyPartGroup) bodyPartGroup.visible = false;
                 updateStatus(`${partName} hidden`);
             }
         }
@@ -1574,28 +1877,38 @@
             isEditMode = !isEditMode;
             
             const toggleBtn = document.getElementById('toggleMode');
+            const canvas = renderer.domElement;
             
             if (isEditMode) {
                 toggleBtn.textContent = '👁️ View Mode';
-                renderer.domElement.style.cursor = 'crosshair';
+                if (currentTool === 'rotate') {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'crosshair';
+                }
             } else {
                 toggleBtn.textContent = '🎨 Edit Mode';
-                renderer.domElement.style.cursor = 'grab';
+                canvas.style.cursor = 'grab';
             }
         }
 
         function resetView() {
-            camera.position.set(3, 2, 3);
-            camera.lookAt(0, 1, 0);
+            camera.position.set(5, 6, 5);
+            camera.lookAt(0, 6, 0);
             updateCameraInfo();
         }
 
         function zoomCamera(factor) {
-            camera.position.multiplyScalar(factor);
+            const targetPosition = new THREE.Vector3(0, 6, 0);
+            const offset = camera.position.clone().sub(targetPosition);
+            offset.multiplyScalar(factor);
             
-            const distance = camera.position.length();
-            if (distance < 2) camera.position.setLength(2);
-            if (distance > 10) camera.position.setLength(10);
+            const distance = offset.length();
+            if (distance < 3) offset.setLength(3);
+            if (distance > 12) offset.setLength(12);
+            
+            camera.position.copy(targetPosition).add(offset);
+            camera.lookAt(targetPosition);
             
             updateCameraInfo();
         }
@@ -1714,7 +2027,7 @@
             skinData.body.set(previousState.body);
             skinData.outer.set(previousState.outer);
             
-            updateVoxelModel();
+            updateSkinTextures();
             updateStatus('Undo applied');
         }
 
@@ -1731,7 +2044,7 @@
             skinData.body.set(redoState.body);
             skinData.outer.set(redoState.outer);
             
-            updateVoxelModel();
+            updateSkinTextures();
             updateStatus('Redo applied');
         }
 
@@ -1753,7 +2066,7 @@
                 }
             }
             
-            updateVoxelModel();
+            updateSkinTextures();
             updateStatus('Skin mirrored');
         }
 
@@ -1780,7 +2093,7 @@
                 }
             }
             
-            updateVoxelModel();
+            updateSkinTextures();
             updateStatus('Skin flipped');
         }
 
@@ -1822,7 +2135,7 @@
                 skinData.body.set(imageData.data);
                 skinData.outer.fill(0);
                 
-                updateVoxelModel();
+                updateSkinTextures();
                 updateStatus(`3D skin imported: ${file.name}`);
             };
             
@@ -1833,33 +2146,24 @@
         function newSkin() {
             if (confirm('Create a new skin? This will clear your current work.')) {
                 initSkinData();
-                updateVoxelModel();
-                updateStatus('New 3D skin created');
+                updateSkinTextures();
+                updateStatus('New empty 3D skin created');
             }
         }
 
         function clearSkin() {
             if (confirm('Clear the current editing layer?')) {
                 const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
+                data.fill(0); // Clear to transparent
                 
-                if (currentEditingLayer === 'body') {
-                    for (let i = 0; i < data.length; i += 4) {
-                        data[i] = 244;
-                        data[i + 1] = 164;
-                        data[i + 2] = 96;
-                        data[i + 3] = 255;
-                    }
-                } else {
-                    data.fill(0);
-                }
-                
-                updateVoxelModel();
+                updateSkinTextures();
                 updateStatus(`${currentEditingLayer} layer cleared`);
             }
         }
 
         function updateCameraInfo() {
-            const distance = Math.round(camera.position.length() * 10) / 10;
+            const targetPosition = new THREE.Vector3(0, 6, 0);
+            const distance = Math.round(camera.position.distanceTo(targetPosition) * 10) / 10;
             const zoom = Math.round((4 / distance) * 100);
             document.getElementById('camera-info').textContent = `Camera: ${isEditMode ? 'Edit' : 'View'} | Zoom: ${zoom}%`;
         }
@@ -1892,8 +2196,9 @@
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
 
-        console.log('🎮 Enhanced 3D Minecraft Skin Editor with grid layout loaded successfully!');
+        console.log('🎮 3D Minecraft Skin Editor with single voxel painting loaded successfully!');
     </script>
+
 
 
 </body></html>
