@@ -1921,7 +1921,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                             case 'front': return { x: 40 + localX, y: 8 + (7 - localY) };
                             case 'back': return { x: 56 + localX, y: 8 + (7 - localY) };
                             case 'right': return { x: 32 + localZ, y: 8 + (7 - localY) };
-                            case 'left': return { x: 48 + localZ, y: 8 + (7 - localY) };
+                            case 'left': return { x: 48 + 7 - localZ, y: 8 + (7 - localY) }; // FIXED
                             case 'top': return { x: 40 + localX, y: 0 + localZ };
                             case 'bottom': return { x: 48 + localX, y: 0 + (7 - localZ) };
                         }
@@ -1931,7 +1931,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                             case 'front': return { x: 8 + localX, y: 8 + (7 - localY) };
                             case 'back': return { x: 24 + localX, y: 8 + (7 - localY) };
                             case 'right': return { x: 0 + localZ, y: 8 + (7 - localY) };
-                            case 'left': return { x: 16 + localZ, y: 8 + (7 - localY) };
+                            case 'left': return { x: 16 + 7 - localZ, y: 8 + (7 - localY) }; // FIXED
                             case 'top': return { x: 8 + localX, y: 0 + localZ };
                             case 'bottom': return { x: 16 + localX, y: 0 + (7 - localZ) };
                         }
