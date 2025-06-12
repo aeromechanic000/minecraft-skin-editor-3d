@@ -1,4 +1,15 @@
-<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com;
+        connect-src 'self' https://text.pollinations.ai;
+        frame-src 'self' https://www.youtube.com https://trytako.com;
+        child-src 'self';
+        manifest-src 'self';
+        worker-src 'self';
+        upgrade-insecure-requests;
+        block-all-mixed-content;">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft 3D Skin Editor</title>
@@ -730,7 +741,7 @@
                     <input type="file" id="import-skin" accept=".png" class="hidden-file-input">
                     <button onclick="document.getElementById('import-skin').click()" class="tool-btn import">Import PNG</button>
                     <button onclick="exportSkin()" class="tool-btn export">Export PNG</button>
-                    <button onclick="newSkin()" class="tool-btn">New Skin</button>
+                    <button onclick="newSkin()" class="tool-btn">New Steve</button>
                     <button onclick="clearSkin()" class="tool-btn clear">Clear</button>
                 </div>
 
@@ -856,7 +867,7 @@
         let isDragging = false;
         let isRotating = false;
         let dragStart = new THREE.Vector2();
-        let lastPaintedVoxel = null; // Track the last painted voxel to prevent multiple paints
+        let lastPaintedVoxel = null;
 
         // Skin data
         let skinData = {
@@ -879,15 +890,15 @@
             rightleg: true
         };
 
-        // 36 Common Minecraft colors palette
+        // Common colors palette
         let commonColors = [
-            '#8B4513', '#F4A460', '#DEB887', '#D2691E', '#654321', '#A0522D',  // Browns/Skin tones
-            '#FF0000', '#FF4500', '#FF6347', '#DC143C', '#8B0000', '#B22222',  // Reds
-            '#0000FF', '#4169E1', '#1E90FF', '#87CEEB', '#000080', '#191970',  // Blues
-            '#228B22', '#32CD32', '#00FF00', '#ADFF2F', '#006400', '#9ACD32',  // Greens
-            '#800080', '#9932CC', '#DA70D6', '#FF69B4', '#4B0082', '#8A2BE2',  // Purples
-            '#FFFF00', '#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B',  // Yellows/Golds
-            '#000000', '#2F2F2F', '#696969', '#808080', '#C0C0C0', '#FFFFFF'   // Grays
+            '#8B4513', '#F4A460', '#DEB887', '#D2691E', '#654321', '#A0522D',
+            '#FF0000', '#FF4500', '#FF6347', '#DC143C', '#8B0000', '#B22222',
+            '#0000FF', '#4169E1', '#1E90FF', '#87CEEB', '#000080', '#191970',
+            '#228B22', '#32CD32', '#00FF00', '#ADFF2F', '#006400', '#9ACD32',
+            '#800080', '#9932CC', '#DA70D6', '#FF69B4', '#4B0082', '#8A2BE2',
+            '#FFFF00', '#FFD700', '#FFA500', '#FF8C00', '#DAA520', '#B8860B',
+            '#000000', '#2F2F2F', '#696969', '#808080', '#C0C0C0', '#FFFFFF'
         ];
 
         // Initialize everything when DOM is loaded
@@ -901,7 +912,7 @@
             updateLayerDisplay();
             updateLayerButtons();
             updatePixelGridButton();
-            updateStatus('🎨 3D Skin Editor loaded - Start with an empty skin!');
+            updateStatus('🎨 3D Skin Editor loaded - Loading Steve skin...');
         });
 
         function initScene() {
@@ -931,7 +942,7 @@
             directionalLight.castShadow = true;
             scene.add(directionalLight);
             
-            // Simple orbit controls
+            // Setup camera controls
             setupCameraControls();
             
             // Start animation loop
@@ -960,7 +971,7 @@
             
             dragStart.copy(mouse);
             isDragging = true;
-            lastPaintedVoxel = null; // Reset painted voxel tracking
+            lastPaintedVoxel = null;
             
             // Right button (2) always rotates
             if (event.button === 2) {
@@ -1017,7 +1028,7 @@
         function onMouseUp(event) {
             isDragging = false;
             isRotating = false;
-            lastPaintedVoxel = null; // Reset when mouse is released
+            lastPaintedVoxel = null;
         }
 
         function onMouseWheel(event) {
@@ -1045,7 +1056,6 @@
             raycaster.setFromCamera(mouse, camera);
             
             if (skinModel) {
-                // Get all visible meshes from current editing layer only
                 const editingLayerMeshes = [];
                 
                 skinModel.children.forEach(layerGroup => {
@@ -1062,7 +1072,6 @@
                     }
                 });
                 
-                // Only intersect with current editing layer meshes
                 const intersects = raycaster.intersectObjects(editingLayerMeshes, false);
                 
                 // Clear previous hover
@@ -1087,27 +1096,23 @@
         function paintFace() {
             if (!hoveredFace || !hoveredFace.userData) return;
             
-            const { voxelX, voxelY, voxelZ, layer } = hoveredFace.userData;
+            const { voxelX, voxelY, voxelZ, layer, face: faceName } = hoveredFace.userData;
             
             // Only paint if it's the current editing layer
             if (layer !== currentEditingLayer) return;
             
-            // Create unique voxel identifier to prevent multiple paints of the same voxel
-            const voxelId = `${voxelX},${voxelY},${voxelZ},${layer}`;
+            const voxelId = `${voxelX},${voxelY},${voxelZ},${layer},${faceName}`;
             
-            // Skip if we already painted this voxel in this paint session
             if (lastPaintedVoxel === voxelId) return;
             
-            // Save state for undo (only on first paint of a session)
             if (lastPaintedVoxel === null) {
                 saveUndoState();
             }
             
-            // Mark this voxel as painted
             lastPaintedVoxel = voxelId;
             
-            // Get proper texture coordinates for this specific voxel
-            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+            // Get proper texture coordinates for this voxel and face
+            const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName);
             if (!texCoords) return;
             
             const { x: textureX, y: textureY } = texCoords;
@@ -1124,13 +1129,11 @@
         function pickColor() {
             if (!hoveredFace || !hoveredFace.userData) return;
             
-            const { voxelX, voxelY, voxelZ, layer } = hoveredFace.userData;
+            const { voxelX, voxelY, voxelZ, layer, face: faceName } = hoveredFace.userData;
             
-            // Only pick from current editing layer
             if (layer !== currentEditingLayer) return;
             
-            // Get proper texture coordinates for this specific voxel
-            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+            const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName);
             if (!texCoords) return;
             
             const { x: textureX, y: textureY } = texCoords;
@@ -1144,6 +1147,53 @@
         }
 
         function initSkinData() {
+            // Load default Steve skin from steve.png
+            loadSteveSkin();
+        }
+
+        function loadSteveSkin() {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 64;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                
+                // Draw the image to canvas and get pixel data
+                ctx.drawImage(img, 0, 0, 64, 64);
+                const imageData = ctx.getImageData(0, 0, 64, 64);
+                const pixels = imageData.data;
+                
+                // Clear both layers first
+                skinData.body.fill(0);
+                skinData.outer.fill(0);
+                
+                // Extract body layer and outer layer from the steve skin
+                extractSkinLayers(pixels);
+                
+                // Enable body layer by default
+                layerVisibility.body = true;
+                layerVisibility.outer = false;
+                currentEditingLayer = 'body';
+                
+                updateLayerButtons();
+                updateLayerVisibility3D();
+                updateSkinTextures();
+                updateLayerDisplay();
+                updateStatus('Steve skin loaded successfully - ready for editing!');
+            };
+            
+            img.onerror = function() {
+                // If steve.png doesn't exist, create empty skin
+                updateStatus('steve.png not found - starting with empty skin');
+                createEmptySkin();
+            };
+            
+            // Try to load steve.png from the same directory
+            img.src = './steve.png';
+        }
+
+        function createEmptySkin() {
             // Initialize both layers as completely transparent/empty
             for (let i = 0; i < skinData.body.length; i += 4) {
                 skinData.body[i] = 0;        // R
@@ -1158,9 +1208,10 @@
                 skinData.outer[i + 2] = 0;   // B
                 skinData.outer[i + 3] = 0;   // A (transparent)
             }
+            
+            updateSkinTextures();
         }
 
-        // Pen tool - draws with exact current color
         function paintPixelPen(x, y) {
             if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
             
@@ -1174,22 +1225,18 @@
             data[index + 3] = 255;
         }
 
-        // Brush tool - draws with random brightness shift of current color
         function paintPixelBrush(x, y) {
             if (x < 0 || x >= 64 || y < 0 || y >= 64) return;
             
             const rgb = hexToRgb(currentColor);
             const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
             
-            // Random brightness shift between -30 and +30
             const brightnessShift = (Math.random() - 0.5) * 60;
             
-            // Apply brightness shift to each color component
             let newR = Math.round(rgb.r + brightnessShift);
             let newG = Math.round(rgb.g + brightnessShift);
             let newB = Math.round(rgb.b + brightnessShift);
             
-            // Clamp values between 0 and 255
             newR = Math.max(0, Math.min(255, newR));
             newG = Math.max(0, Math.min(255, newG));
             newB = Math.max(0, Math.min(255, newB));
@@ -1212,7 +1259,7 @@
             const b = data[index + 2];
             const a = data[index + 3];
             
-            if (a === 0) return '#000000'; // Transparent pixel
+            if (a === 0) return '#000000';
             
             return rgbToHex(r, g, b);
         }
@@ -1220,13 +1267,11 @@
         function createSkinModel() {
             skinModel = new THREE.Group();
             
-            // Create body and outer layer groups
             const bodyGroup = new THREE.Group();
             const outerGroup = new THREE.Group();
             
-            // Create surface meshes for body parts - only surface voxels
             createBodyPartSurfaces(bodyGroup, 'body', 1.0);
-            createBodyPartSurfaces(outerGroup, 'outer', 1.25); // 25% larger for proper clothing effect
+            createBodyPartSurfaces(outerGroup, 'outer', 1.1);
             
             bodyGroup.name = 'body_layer';
             outerGroup.name = 'outer_layer';
@@ -1238,22 +1283,22 @@
         }
 
         function createBodyPartSurfaces(parentGroup, layer, scale) {
-            // Head surfaces (8x8x8) - only surface voxels
+            // Head surfaces (8x8x8)
             const headGroup = createPartSurfaces('head', -4, 4, 50, 58, -4, 4, layer, scale);
             
-            // Body surfaces (8x12x4) - only surface voxels  
+            // Body surfaces (8x12x4)
             const bodyGroup = createPartSurfaces('body', -4, 4, 38, 50, -2, 2, layer, scale);
             
-            // Right arm surfaces (4x12x4) - only surface voxels
+            // Right arm surfaces (4x12x4)
             const rightArmGroup = createPartSurfaces('rightarm', -7, -3, 38, 50, -2, 2, layer, scale);
             
-            // Left arm surfaces (4x12x4) - only surface voxels
+            // Left arm surfaces (4x12x4)
             const leftArmGroup = createPartSurfaces('leftarm', 3, 7, 38, 50, -2, 2, layer, scale);
             
-            // Right leg surfaces (4x12x4) - only surface voxels
+            // Right leg surfaces (4x12x4)
             const rightLegGroup = createPartSurfaces('rightleg', -4, 0, 26, 38, -2, 2, layer, scale);
             
-            // Left leg surfaces (4x12x4) - only surface voxels
+            // Left leg surfaces (4x12x4)
             const leftLegGroup = createPartSurfaces('leftleg', 0, 4, 26, 38, -2, 2, layer, scale);
             
             parentGroup.add(headGroup);
@@ -1264,61 +1309,74 @@
             parentGroup.add(leftLegGroup);
         }
 
+        // FIXED: Proper outer layer positioning that covers the body layer
         function createPartSurfaces(partName, xMin, xMax, yMin, yMax, zMin, zMax, layer, scale) {
             const partGroup = new THREE.Group();
             partGroup.name = `${partName}_${layer}`;
             
-            const voxelSize = 0.125 * scale;
-            
-            // For outer layer, we need to offset the position to be centered around the body
-            const offsetMultiplier = layer === 'outer' ? (scale - 1.0) / 2.0 : 0;
-            
-            // Create only surface voxels - check if voxel is on the boundary
             for (let x = xMin; x < xMax; x++) {
                 for (let y = yMin; y < yMax; y++) {
                     for (let z = zMin; z < zMax; z++) {
-                        // Check if voxel is on any surface (boundary)
                         if (isOnSurface(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax)) {
-                            createVoxelSurfaces(partGroup, x, y, z, voxelSize, layer, partName, offsetMultiplier);
+                            createVoxelSurfaces(partGroup, x, y, z, xMin, xMax, yMin, yMax, zMin, zMax, scale, layer, partName);
                         }
                     }
                 }
+            }
+            
+            // FIXED: For outer layer, apply proper scaling and positioning
+            if (layer === 'outer' && scale !== 1.0) {
+                // Calculate the center of the body part for proper scaling origin
+                const centerX = (xMin + xMax) / 2;
+                const centerY = (yMin + yMax) / 2;
+                const centerZ = (zMin + zMax) / 2;
+                
+                // Scale the entire part group uniformly from its center
+                partGroup.scale.set(scale, scale, scale);
+                
+                // Position the scaled group so it surrounds the body layer perfectly
+                // No additional offset needed - scaling from center already positions it correctly
+                const bodyCenter = new THREE.Vector3(centerX * 0.125, centerY * 0.125, centerZ * 0.125);
+                partGroup.position.copy(bodyCenter);
+                
+                // Apply inverse transform to compensate for scaling
+                partGroup.position.multiplyScalar(1 - scale);
             }
             
             return partGroup;
         }
 
         function isOnSurface(x, y, z, xMin, xMax, yMin, yMax, zMin, zMax) {
-            // A voxel is on the surface if it's on any boundary
             return (
-                x === xMin || x === xMax - 1 ||  // Left or right face
-                y === yMin || y === yMax - 1 ||  // Bottom or top face
-                z === zMin || z === zMax - 1     // Front or back face
+                x === xMin || x === xMax - 1 ||
+                y === yMin || y === yMax - 1 ||
+                z === zMin || z === zMax - 1
             );
         }
 
-        function createVoxelSurfaces(parentGroup, voxelX, voxelY, voxelZ, voxelSize, layer, partName, offsetMultiplier = 0) {
-            // Get texture coordinates for this specific voxel
-            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
-            if (!texCoords) return;
-            
-            const { x: textureX, y: textureY } = texCoords;
-            
-            // Create 6 face geometries but only show faces that are actually on the surface
+        function createVoxelSurfaces(parentGroup, voxelX, voxelY, voxelZ, xMin, xMax, yMin, yMax, zMin, zMax, scale, layer, partName) {
+            const voxelSize = 0.125;
             const faceGeometry = new THREE.PlaneGeometry(voxelSize, voxelSize);
             
-            // Define face positions and rotations
+            // Define faces with conditions for when they should be visible
             const faces = [
-                { pos: [voxelSize/2, 0, 0], rot: [0, Math.PI/2, 0], name: 'right' },
-                { pos: [-voxelSize/2, 0, 0], rot: [0, -Math.PI/2, 0], name: 'left' },
-                { pos: [0, voxelSize/2, 0], rot: [-Math.PI/2, 0, 0], name: 'top' },
-                { pos: [0, -voxelSize/2, 0], rot: [Math.PI/2, 0, 0], name: 'bottom' },
-                { pos: [0, 0, voxelSize/2], rot: [0, 0, 0], name: 'front' },
-                { pos: [0, 0, -voxelSize/2], rot: [0, Math.PI, 0], name: 'back' }
+                { pos: [voxelSize/2, 0, 0], rot: [0, Math.PI/2, 0], name: 'right', condition: voxelX === xMax - 1 },
+                { pos: [-voxelSize/2, 0, 0], rot: [0, -Math.PI/2, 0], name: 'left', condition: voxelX === xMin },
+                { pos: [0, voxelSize/2, 0], rot: [-Math.PI/2, 0, 0], name: 'top', condition: voxelY === yMax - 1 },
+                { pos: [0, -voxelSize/2, 0], rot: [Math.PI/2, 0, 0], name: 'bottom', condition: voxelY === yMin },
+                { pos: [0, 0, voxelSize/2], rot: [0, 0, 0], name: 'front', condition: voxelZ === zMax - 1 },
+                { pos: [0, 0, -voxelSize/2], rot: [0, Math.PI, 0], name: 'back', condition: voxelZ === zMin }
             ];
             
             faces.forEach(face => {
-                // Get material properties based on layer and texture data
+                // Only create faces that are actually on the surface
+                if (!face.condition) return;
+                
+                const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, face.name, partName);
+                if (!texCoords) return;
+                
+                const { x: textureX, y: textureY } = texCoords;
+                
                 const materialProps = getVoxelMaterial(textureX, textureY, layer);
                 
                 const material = new THREE.MeshLambertMaterial({
@@ -1330,21 +1388,15 @@
                 
                 const faceMesh = new THREE.Mesh(faceGeometry, material);
                 
-                // FIXED: Position faces at the center of each grid cell
-                // Convert voxel coordinates to world coordinates and center within grid cell
-                const baseX = (voxelX + 0.5) * 0.125; // +0.5 centers the voxel in its grid cell
+                // Position faces normally - scaling happens at group level
+                const baseX = (voxelX + 0.5) * 0.125;
                 const baseY = (voxelY + 0.5) * 0.125;
                 const baseZ = (voxelZ + 0.5) * 0.125;
                 
-                // Apply offset for outer layer to make it surround the body layer
-                const offsetX = offsetMultiplier * Math.sign(baseX || 1);
-                const offsetY = offsetMultiplier * Math.sign(baseY || 1);
-                const offsetZ = offsetMultiplier * Math.sign(baseZ || 1);
-                
                 faceMesh.position.set(
-                    baseX + face.pos[0] + offsetX,
-                    baseY + face.pos[1] + offsetY,
-                    baseZ + face.pos[2] + offsetZ
+                    baseX + face.pos[0],
+                    baseY + face.pos[1],
+                    baseZ + face.pos[2]
                 );
                 
                 faceMesh.rotation.set(face.rot[0], face.rot[1], face.rot[2]);
@@ -1374,15 +1426,12 @@
             const a = data[index + 3];
             
             if (a === 0) {
-                // Empty pixel
                 if (layer === 'outer') {
-                    // For outer layer, completely transparent when empty
                     return {
                         color: 0x000000,
                         opacity: 0.0
                     };
                 } else {
-                    // For body layer, show grid when empty
                     return {
                         color: showPixelGrid ? 0x404040 : 0x202020,
                         opacity: showPixelGrid ? 0.2 : 0.0
@@ -1396,125 +1445,137 @@
             };
         }
 
-        // Fixed texture coordinate mapping function
-        function getVoxelTextureCoords(voxelX, voxelY, voxelZ) {
-            // Map 3D voxel coordinates to proper 2D texture coordinates
-            // This is crucial for correct pixel painting
+        // FIXED: Complete texture coordinate mapping for all faces and body parts
+        function getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName, partName) {
+            // Convert voxel coordinates to local coordinates within each body part
+            let localX, localY, localZ;
             
-            // Head area (Y: 50-57, 8 units tall)
+            // Determine body part and convert to local coordinates
             if (voxelY >= 50 && voxelY <= 57) {
-                // Head front face mapping
-                const localX = voxelX + 4; // Convert to 0-7 range
-                const localY = 57 - voxelY; // Convert to 0-7 range (flip Y)
-                return {
-                    x: 8 + localX,
-                    y: 8 + localY
-                };
-            }
-            
-            // Body area (Y: 38-49, 12 units tall)
-            if (voxelY >= 38 && voxelY <= 49) {
-                // Body front face mapping
-                const localX = voxelX + 4; // Convert to 0-7 range
-                const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
-                return {
-                    x: 20 + localX,
-                    y: 20 + localY
-                };
-            }
-            
-            // Legs area (Y: 26-37, 12 units tall)
-            if (voxelY >= 26 && voxelY <= 37) {
-                // Right leg (X: -4 to -1) and Left leg (X: 0 to 3)
+                // Head
+                partName = 'head';
+                localX = voxelX + 4; // -4 to 3 becomes 0 to 7
+                localY = voxelY - 50; // 50 to 57 becomes 0 to 7
+                localZ = voxelZ + 4; // -4 to 3 becomes 0 to 7
+            } else if (voxelY >= 38 && voxelY <= 49) {
+                if (voxelX >= -4 && voxelX <= 3) {
+                    // Body
+                    partName = 'body';
+                    localX = voxelX + 4; // -4 to 3 becomes 0 to 7
+                    localY = voxelY - 38; // 38 to 49 becomes 0 to 11
+                    localZ = voxelZ + 2; // -2 to 1 becomes 0 to 3
+                } else if (voxelX >= -7 && voxelX <= -4) {
+                    // Right arm
+                    partName = 'rightarm';
+                    localX = voxelX + 7; // -7 to -4 becomes 0 to 3
+                    localY = voxelY - 38; // 38 to 49 becomes 0 to 11
+                    localZ = voxelZ + 2; // -2 to 1 becomes 0 to 3
+                } else if (voxelX >= 4 && voxelX <= 7) {
+                    // Left arm
+                    partName = 'leftarm';
+                    localX = voxelX - 4; // 4 to 7 becomes 0 to 3
+                    localY = voxelY - 38; // 38 to 49 becomes 0 to 11
+                    localZ = voxelZ + 2; // -2 to 1 becomes 0 to 3
+                }
+            } else if (voxelY >= 26 && voxelY <= 37) {
                 if (voxelX >= -4 && voxelX <= -1) {
-                    // Right leg front face mapping
-                    const localX = voxelX + 4; // Convert to 0-3 range
-                    const localY = 37 - voxelY; // Convert to 0-11 range (flip Y)
-                    return {
-                        x: 4 + localX,
-                        y: 20 + localY
-                    };
+                    // Right leg
+                    partName = 'rightleg';
+                    localX = voxelX + 4; // -4 to -1 becomes 0 to 3
+                    localY = voxelY - 26; // 26 to 37 becomes 0 to 11
+                    localZ = voxelZ + 2; // -2 to 1 becomes 0 to 3
                 } else if (voxelX >= 0 && voxelX <= 3) {
-                    // Left leg front face mapping
-                    const localX = voxelX; // Already 0-3 range
-                    const localY = 37 - voxelY; // Convert to 0-11 range (flip Y)
-                    return {
-                        x: 20 + localX,
-                        y: 52 + localY
-                    };
+                    // Left leg
+                    partName = 'leftleg';
+                    localX = voxelX; // 0 to 3 stays 0 to 3
+                    localY = voxelY - 26; // 26 to 37 becomes 0 to 11
+                    localZ = voxelZ + 2; // -2 to 1 becomes 0 to 3
                 }
             }
             
-            // Arms area (Y: 38-49, 12 units tall)
-            if (voxelY >= 38 && voxelY <= 49) {
-                // Right arm (X: -7 to -4) and Left arm (X: 3 to 6)
-                if (voxelX >= -7 && voxelX <= -4) {
-                    // Right arm front face mapping
-                    const localX = voxelX + 7; // Convert to 0-3 range
-                    const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
-                    return {
-                        x: 44 + localX,
-                        y: 20 + localY
-                    };
-                } else if (voxelX >= 3 && voxelX <= 6) {
-                    // Left arm front face mapping
-                    const localX = voxelX - 3; // Convert to 0-3 range
-                    const localY = 49 - voxelY; // Convert to 0-11 range (flip Y)
-                    return {
-                        x: 36 + localX,
-                        y: 52 + localY
-                    };
-                }
-            }
-            
-            // Default fallback
-            return {
-                x: Math.max(0, Math.min(63, Math.floor(voxelX + 32))),
-                y: Math.max(0, Math.min(63, Math.floor(voxelZ + 32)))
-            };
+            return getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName);
         }
 
-        function getVoxelFaceColor(textureX, textureY, layer) {
-            const data = layer === 'body' ? skinData.body : skinData.outer;
-            const index = (textureY * 64 + textureX) * 4;
+        function getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName) {
+            // Minecraft skin texture layout mapping
+            // This function maps each face of each body part to the correct texture coordinates
             
-            const r = data[index];
-            const g = data[index + 1];
-            const b = data[index + 2];
-            const a = data[index + 3];
-            
-            if (a === 0) {
-                // Empty pixel - show grid color only for body layer
-                if (layer === 'outer') {
-                    return 0x000000; // Invisible for outer layer
-                }
-                return showPixelGrid ? 0x404040 : 0x202020;
+            switch (partName) {
+                case 'head':
+                    switch (faceName) {
+                        case 'front': return { x: 8 + localX, y: 8 + (7 - localY) };
+                        case 'back': return { x: 24 + localX, y: 8 + (7 - localY) };
+                        case 'right': return { x: 0 + localZ, y: 8 + (7 - localY) };
+                        case 'left': return { x: 16 + localZ, y: 8 + (7 - localY) };
+                        case 'top': return { x: 8 + localX, y: 0 + localZ };
+                        case 'bottom': return { x: 16 + localX, y: 0 + (7 - localZ) };
+                    }
+                    break;
+                    
+                case 'body':
+                    switch (faceName) {
+                        case 'front': return { x: 20 + localX, y: 20 + (11 - localY) };
+                        case 'back': return { x: 32 + localX, y: 20 + (11 - localY) };
+                        case 'right': return { x: 16 + localZ, y: 20 + (11 - localY) };
+                        case 'left': return { x: 28 + localZ, y: 20 + (11 - localY) };
+                        case 'top': return { x: 20 + localX, y: 16 + localZ };
+                        case 'bottom': return { x: 28 + localX, y: 16 + (3 - localZ) };
+                    }
+                    break;
+                    
+                case 'rightarm':
+                    switch (faceName) {
+                        case 'front': return { x: 44 + localX, y: 20 + (11 - localY) };
+                        case 'back': return { x: 52 + localX, y: 20 + (11 - localY) };
+                        case 'right': return { x: 40 + localZ, y: 20 + (11 - localY) };
+                        case 'left': return { x: 48 + localZ, y: 20 + (11 - localY) };
+                        case 'top': return { x: 44 + localX, y: 16 + localZ };
+                        case 'bottom': return { x: 48 + localX, y: 16 + (3 - localZ) };
+                    }
+                    break;
+                    
+                case 'leftarm':
+                    switch (faceName) {
+                        case 'front': return { x: 36 + localX, y: 52 + (11 - localY) };
+                        case 'back': return { x: 44 + localX, y: 52 + (11 - localY) };
+                        case 'right': return { x: 32 + localZ, y: 52 + (11 - localY) };
+                        case 'left': return { x: 40 + localZ, y: 52 + (11 - localY) };
+                        case 'top': return { x: 36 + localX, y: 48 + localZ };
+                        case 'bottom': return { x: 40 + localX, y: 48 + (3 - localZ) };
+                    }
+                    break;
+                    
+                case 'rightleg':
+                    switch (faceName) {
+                        case 'front': return { x: 4 + localX, y: 20 + (11 - localY) };
+                        case 'back': return { x: 12 + localX, y: 20 + (11 - localY) };
+                        case 'right': return { x: 0 + localZ, y: 20 + (11 - localY) };
+                        case 'left': return { x: 8 + localZ, y: 20 + (11 - localY) };
+                        case 'top': return { x: 4 + localX, y: 16 + localZ };
+                        case 'bottom': return { x: 8 + localX, y: 16 + (3 - localZ) };
+                    }
+                    break;
+                    
+                case 'leftleg':
+                    switch (faceName) {
+                        case 'front': return { x: 20 + localX, y: 52 + (11 - localY) };
+                        case 'back': return { x: 28 + localX, y: 52 + (11 - localY) };
+                        case 'right': return { x: 16 + localZ, y: 52 + (11 - localY) };
+                        case 'left': return { x: 24 + localZ, y: 52 + (11 - localY) };
+                        case 'top': return { x: 20 + localX, y: 48 + localZ };
+                        case 'bottom': return { x: 24 + localX, y: 48 + (3 - localZ) };
+                    }
+                    break;
             }
             
-            return (r << 16) | (g << 8) | b;
-        }
-
-        function getVoxelFaceOpacity(textureX, textureY, layer) {
-            const data = layer === 'body' ? skinData.body : skinData.outer;
-            const index = (textureY * 64 + textureX) * 4;
-            const a = data[index + 3];
-            
-            if (a === 0) {
-                // Empty pixel
-                if (layer === 'outer') {
-                    return 0.0; // Completely transparent for outer layer
-                }
-                return showPixelGrid ? 0.2 : 0.0; // Faint for body layer grid
-            }
-            
-            return 1.0;
+            // Fallback
+            return { x: 0, y: 0 };
         }
 
         function createGridOverlay() {
             gridOverlay = new THREE.Group();
             
             if (showPixelGrid) {
-                // Only show grid for visible layers
                 if (layerVisibility.body) {
                     const gridMaterial = new THREE.LineBasicMaterial({ 
                         color: 0xffffff, 
@@ -1523,7 +1584,6 @@
                         linewidth: 2
                     });
                     
-                    // Create wireframe grids for body layer - only surface boundaries
                     createPartGrid('head_body', -4, 4, 50, 58, -4, 4, gridMaterial, 1.0, false);
                     createPartGrid('body_body', -4, 4, 38, 50, -2, 2, gridMaterial, 1.0, false);
                     createPartGrid('rightarm_body', -7, -3, 38, 50, -2, 2, gridMaterial, 1.0, false);
@@ -1532,21 +1592,21 @@
                     createPartGrid('leftleg_body', 0, 4, 26, 38, -2, 2, gridMaterial, 1.0, false);
                 }
                 
-                // Only show outer grid when outer layer is visible
                 if (layerVisibility.outer) {
                     const outerGridMaterial = new THREE.LineBasicMaterial({ 
-                        color: 0xff6600, // Orange color for outer layer grid
+                        color: 0xff6600,
                         transparent: true, 
                         opacity: 0.4,
                         linewidth: 1
                     });
                     
-                    createPartGrid('head_outer', -4, 4, 50, 58, -4, 4, outerGridMaterial, 1.25, true);
-                    createPartGrid('body_outer', -4, 4, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
-                    createPartGrid('rightarm_outer', -7, -3, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
-                    createPartGrid('leftarm_outer', 3, 7, 38, 50, -2, 2, outerGridMaterial, 1.25, true);
-                    createPartGrid('rightleg_outer', -4, 0, 26, 38, -2, 2, outerGridMaterial, 1.25, true);
-                    createPartGrid('leftleg_outer', 0, 4, 26, 38, -2, 2, outerGridMaterial, 1.25, true);
+                    // FIXED: Outer grid uses same positioning as outer layer
+                    createPartGrid('head_outer', -4, 4, 50, 58, -4, 4, outerGridMaterial, 1.1, true);
+                    createPartGrid('body_outer', -4, 4, 38, 50, -2, 2, outerGridMaterial, 1.1, true);
+                    createPartGrid('rightarm_outer', -7, -3, 38, 50, -2, 2, outerGridMaterial, 1.1, true);
+                    createPartGrid('leftarm_outer', 3, 7, 38, 50, -2, 2, outerGridMaterial, 1.1, true);
+                    createPartGrid('rightleg_outer', -4, 0, 26, 38, -2, 2, outerGridMaterial, 1.1, true);
+                    createPartGrid('leftleg_outer', 0, 4, 26, 38, -2, 2, outerGridMaterial, 1.1, true);
                 }
             }
             
@@ -1554,31 +1614,19 @@
         }
 
         function createPartGrid(partName, xMin, xMax, yMin, yMax, zMin, zMax, material, scale, isOuter = false) {
-            const voxelSize = 0.125 * scale;
             const partGrid = new THREE.Group();
             partGrid.name = `grid_${partName}`;
             
-            // For outer layer grid, apply same offset as the voxels
-            const offsetMultiplier = isOuter ? (scale - 1.0) / 2.0 : 0;
-            
-            // FIXED: Create grid lines that align with voxel centers
-            // Grid lines should be positioned to form the boundaries of voxel cells
+            // Create grid lines at base size
             for (let x = xMin; x <= xMax; x++) {
                 for (let y = yMin; y <= yMax; y++) {
-                    // Convert voxel coordinates to world coordinates (centered)
                     const baseX = x * 0.125;
                     const baseY = y * 0.125;
-                    const offsetX = isOuter ? offsetMultiplier * Math.sign(baseX || 1) : 0;
-                    const offsetY = isOuter ? offsetMultiplier * Math.sign(baseY || 1) : 0;
                     
-                    // Z lines only on front and back faces
                     if ((x === xMin || x === xMax) || (y === yMin || y === yMax)) {
-                        const zMinOffset = isOuter ? offsetMultiplier * Math.sign(zMin * 0.125 || 1) : 0;
-                        const zMaxOffset = isOuter ? offsetMultiplier * Math.sign(zMax * 0.125 || 1) : 0;
-                        
                         const zGeometry = new THREE.BufferGeometry().setFromPoints([
-                            new THREE.Vector3(baseX + offsetX, baseY + offsetY, zMin * 0.125 + zMinOffset),
-                            new THREE.Vector3(baseX + offsetX, baseY + offsetY, zMax * 0.125 + zMaxOffset)
+                            new THREE.Vector3(baseX, baseY, zMin * 0.125),
+                            new THREE.Vector3(baseX, baseY, zMax * 0.125)
                         ]);
                         partGrid.add(new THREE.Line(zGeometry, material));
                     }
@@ -1587,17 +1635,11 @@
                 for (let z = zMin; z <= zMax; z++) {
                     const baseX = x * 0.125;
                     const baseZ = z * 0.125;
-                    const offsetX = isOuter ? offsetMultiplier * Math.sign(baseX || 1) : 0;
-                    const offsetZ = isOuter ? offsetMultiplier * Math.sign(baseZ || 1) : 0;
                     
-                    // Y lines only on side faces
                     if ((x === xMin || x === xMax) || (z === zMin || z === zMax)) {
-                        const yMinOffset = isOuter ? offsetMultiplier * Math.sign(yMin * 0.125 || 1) : 0;
-                        const yMaxOffset = isOuter ? offsetMultiplier * Math.sign(yMax * 0.125 || 1) : 0;
-                        
                         const yGeometry = new THREE.BufferGeometry().setFromPoints([
-                            new THREE.Vector3(baseX + offsetX, yMin * 0.125 + yMinOffset, baseZ + offsetZ),
-                            new THREE.Vector3(baseX + offsetX, yMax * 0.125 + yMaxOffset, baseZ + offsetZ)
+                            new THREE.Vector3(baseX, yMin * 0.125, baseZ),
+                            new THREE.Vector3(baseX, yMax * 0.125, baseZ)
                         ]);
                         partGrid.add(new THREE.Line(yGeometry, material));
                     }
@@ -1608,21 +1650,28 @@
                 for (let z = zMin; z <= zMax; z++) {
                     const baseY = y * 0.125;
                     const baseZ = z * 0.125;
-                    const offsetY = isOuter ? offsetMultiplier * Math.sign(baseY || 1) : 0;
-                    const offsetZ = isOuter ? offsetMultiplier * Math.sign(baseZ || 1) : 0;
                     
-                    // X lines only on top/bottom faces
                     if ((y === yMin || y === yMax) || (z === zMin || z === zMax)) {
-                        const xMinOffset = isOuter ? offsetMultiplier * Math.sign(xMin * 0.125 || 1) : 0;
-                        const xMaxOffset = isOuter ? offsetMultiplier * Math.sign(xMax * 0.125 || 1) : 0;
-                        
                         const xGeometry = new THREE.BufferGeometry().setFromPoints([
-                            new THREE.Vector3(xMin * 0.125 + xMinOffset, baseY + offsetY, baseZ + offsetZ),
-                            new THREE.Vector3(xMax * 0.125 + xMaxOffset, baseY + offsetY, baseZ + offsetZ)
+                            new THREE.Vector3(xMin * 0.125, baseY, baseZ),
+                            new THREE.Vector3(xMax * 0.125, baseY, baseZ)
                         ]);
                         partGrid.add(new THREE.Line(xGeometry, material));
                     }
                 }
+            }
+            
+            // FIXED: Apply same positioning as outer layer
+            if (isOuter) {
+                const centerX = (xMin + xMax) / 2;
+                const centerY = (yMin + yMax) / 2;
+                const centerZ = (zMin + zMax) / 2;
+                
+                partGrid.scale.set(scale, scale, scale);
+                
+                const bodyCenter = new THREE.Vector3(centerX * 0.125, centerY * 0.125, centerZ * 0.125);
+                partGrid.position.copy(bodyCenter);
+                partGrid.position.multiplyScalar(1 - scale);
             }
             
             gridOverlay.add(partGrid);
@@ -1631,15 +1680,13 @@
         function updateSkinTextures() {
             if (!skinModel) return;
             
-            // Update all face materials
             skinModel.children.forEach(layerGroup => {
                 layerGroup.children.forEach(partGroup => {
                     partGroup.children.forEach(face => {
                         if (face.userData) {
-                            const { voxelX, voxelY, voxelZ, layer } = face.userData;
+                            const { voxelX, voxelY, voxelZ, layer, face: faceName } = face.userData;
                             
-                            // Get proper texture coordinates for this voxel
-                            const texCoords = getVoxelTextureCoords(voxelX, voxelY, voxelZ);
+                            const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName);
                             if (texCoords) {
                                 const material = getVoxelMaterial(texCoords.x, texCoords.y, layer);
                                 face.material.color.setHex(material.color);
@@ -1653,22 +1700,18 @@
         }
 
         function setupEventListeners() {
-            // Tool events
             document.getElementById('color-picker').addEventListener('change', (e) => {
                 currentColor = e.target.value;
                 document.getElementById('color-code-input').value = e.target.value;
             });
             
-            // Control buttons
             document.getElementById('resetView').addEventListener('click', resetView);
             document.getElementById('toggleMode').addEventListener('click', toggleMode);
             document.getElementById('zoomIn').addEventListener('click', () => zoomCamera(0.9));
             document.getElementById('zoomOut').addEventListener('click', () => zoomCamera(1.1));
             
-            // Import file event
             document.getElementById('import-skin').addEventListener('change', importSkin);
             
-            // Keyboard shortcuts
             document.addEventListener('keydown', handleKeyboard);
         }
 
@@ -1727,7 +1770,6 @@
             });
             document.getElementById(`tool-${tool}`).classList.add('active');
             
-            // Update cursor based on tool and mode
             const canvas = renderer.domElement;
             if (tool === 'rotate' || !isEditMode) {
                 canvas.style.cursor = 'grab';
@@ -1735,7 +1777,6 @@
                 canvas.style.cursor = 'crosshair';
             }
             
-            // Update status with tool descriptions
             let toolDescription = '';
             switch(tool) {
                 case 'pen':
@@ -1758,29 +1799,25 @@
         function toggleLayerVisibility(layer) {
             layerVisibility[layer] = !layerVisibility[layer];
             
-            // Update current editing layer based on visible layers
             updateCurrentEditingLayer();
             
             updateLayerButtons();
             updateLayerDisplay();
             updateLayerVisibility3D();
-            updateGridOverlay(); // This will now show/hide grids based on layer visibility
+            updateGridOverlay();
             
             const status = layerVisibility[layer] ? 'shown' : 'hidden';
             updateStatus(`${layer} layer ${status}`);
         }
 
         function updateCurrentEditingLayer() {
-            // Determine which layer should be edited based on visibility
-            // Priority: outer layer if visible, otherwise body layer if visible
             if (layerVisibility.outer) {
                 currentEditingLayer = 'outer';
             } else if (layerVisibility.body) {
                 currentEditingLayer = 'body';
             } else {
-                // If no layers are visible, default to body
                 currentEditingLayer = 'body';
-                layerVisibility.body = true; // Force body layer visible
+                layerVisibility.body = true;
             }
         }
 
@@ -1798,11 +1835,10 @@
             updateSkinTextures();
         }
 
-        // Pixel grid toggle function
         function togglePixelGrid() {
             showPixelGrid = !showPixelGrid;
             updatePixelGridButton();
-            updateGridOverlay(); // This will show/hide grids based on layer visibility and grid setting
+            updateGridOverlay();
             updateSkinTextures();
             
             const status = showPixelGrid ? 'shown' : 'hidden';
@@ -1817,16 +1853,13 @@
         }
 
         function updateLayerButtons() {
-            // Update layer buttons to show only visibility state
             const bodyLayerBtn = document.getElementById('layer-body');
             const outerLayerBtn = document.getElementById('layer-outer');
             
-            // Body layer button
             bodyLayerBtn.classList.toggle('visible', layerVisibility.body);
             bodyLayerBtn.classList.remove('editing');
             bodyLayerBtn.textContent = 'Body';
             
-            // Outer layer button
             outerLayerBtn.classList.toggle('visible', layerVisibility.outer);
             outerLayerBtn.classList.remove('editing');
             outerLayerBtn.textContent = 'Outer';
@@ -1843,7 +1876,6 @@
             
             const btn = document.getElementById(`part-${partName}`);
             
-            // Toggle visibility for both layers of this body part
             skinModel.children.forEach(layerGroup => {
                 layerGroup.children.forEach(partGroup => {
                     if (partGroup.name.includes(partName)) {
@@ -1951,12 +1983,10 @@
             const colorInput = document.getElementById('color-code-input');
             let colorCode = colorInput.value.trim();
             
-            // Validate and normalize color code
             if (!colorCode.startsWith('#')) {
                 colorCode = '#' + colorCode;
             }
             
-            // Basic validation
             if (/^#[0-9A-F]{6}$/i.test(colorCode)) {
                 currentColor = colorCode.toLowerCase();
                 document.getElementById('color-picker').value = currentColor;
@@ -1965,34 +1995,6 @@
                 updateStatus('Invalid color code! Use format: #RRGGBB');
                 colorInput.value = currentColor;
             }
-        }
-
-        function fillRect(layer, x, y, w, h, color) {
-            const rgb = hexToRgb(color);
-            const data = layer === 'body' ? skinData.body : skinData.outer;
-            
-            for (let py = y; py < y + h; py++) {
-                for (let px = x; px < x + w; px++) {
-                    if (px >= 0 && px < 64 && py >= 0 && py < 64) {
-                        const index = (py * 64 + px) * 4;
-                        data[index] = rgb.r;
-                        data[index + 1] = rgb.g;
-                        data[index + 2] = rgb.b;
-                        data[index + 3] = 255;
-                    }
-                }
-            }
-        }
-
-        function setPixel(layer, x, y, color) {
-            const rgb = hexToRgb(color);
-            const data = layer === 'body' ? skinData.body : skinData.outer;
-            const index = (y * 64 + x) * 4;
-            
-            data[index] = rgb.r;
-            data[index + 1] = rgb.g;
-            data[index + 2] = rgb.b;
-            data[index + 3] = 255;
         }
 
         // Undo/Redo functions
@@ -2104,11 +2106,24 @@
             canvas.height = 64;
             const ctx = canvas.getContext('2d');
             
-            const bodyImageData = new ImageData(skinData.body, 64, 64);
-            const outerImageData = new ImageData(skinData.outer, 64, 64);
+            // Export both layers combined into a single skin file
+            const combinedData = new Uint8ClampedArray(64 * 64 * 4);
             
-            ctx.putImageData(bodyImageData, 0, 0);
-            ctx.putImageData(outerImageData, 0, 0);
+            // Start with body layer as base
+            combinedData.set(skinData.body);
+            
+            // Overlay outer layer data where it exists
+            for (let i = 0; i < skinData.outer.length; i += 4) {
+                if (skinData.outer[i + 3] > 0) { // If outer layer pixel is not transparent
+                    combinedData[i] = skinData.outer[i];
+                    combinedData[i + 1] = skinData.outer[i + 1];
+                    combinedData[i + 2] = skinData.outer[i + 2];
+                    combinedData[i + 3] = skinData.outer[i + 3];
+                }
+            }
+            
+            const imageData = new ImageData(combinedData, 64, 64);
+            ctx.putImageData(imageData, 0, 0);
             
             const link = document.createElement('a');
             link.download = 'minecraft_skin_3d.png';
@@ -2118,6 +2133,7 @@
             updateStatus('3D skin exported successfully!');
         }
 
+        // FIXED: Import function now properly extracts both body and outer layers
         function importSkin(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -2129,32 +2145,170 @@
                 canvas.height = 64;
                 const ctx = canvas.getContext('2d');
                 
+                // Draw the image to canvas and get pixel data
                 ctx.drawImage(img, 0, 0, 64, 64);
                 const imageData = ctx.getImageData(0, 0, 64, 64);
+                const pixels = imageData.data;
                 
-                skinData.body.set(imageData.data);
+                // Clear both layers first
+                skinData.body.fill(0);
                 skinData.outer.fill(0);
                 
+                // Extract body layer and outer layer from the standard Minecraft skin format
+                extractSkinLayers(pixels);
+                
+                // Enable both layers for viewing
+                layerVisibility.body = true;
+                layerVisibility.outer = true;
+                
+                updateLayerButtons();
+                updateLayerVisibility3D();
                 updateSkinTextures();
-                updateStatus(`3D skin imported: ${file.name}`);
+                updateStatus(`3D skin imported: ${file.name} - Both layers extracted`);
             };
             
             img.src = URL.createObjectURL(file);
             e.target.value = '';
         }
 
+        function extractSkinLayers(pixels) {
+            // Minecraft skin format has body layer and outer layer areas defined
+            // Body layer areas (main skin)
+            const bodyAreas = [
+                { x: 8, y: 8, w: 8, h: 8 },    // Head front
+                { x: 0, y: 8, w: 8, h: 8 },    // Head right
+                { x: 16, y: 8, w: 8, h: 8 },   // Head left  
+                { x: 24, y: 8, w: 8, h: 8 },   // Head back
+                { x: 8, y: 0, w: 8, h: 8 },    // Head top
+                { x: 16, y: 0, w: 8, h: 8 },   // Head bottom
+                
+                { x: 20, y: 20, w: 8, h: 12 }, // Body front
+                { x: 16, y: 20, w: 4, h: 12 }, // Body right
+                { x: 28, y: 20, w: 4, h: 12 }, // Body left
+                { x: 32, y: 20, w: 8, h: 12 }, // Body back
+                { x: 20, y: 16, w: 8, h: 4 },  // Body top
+                { x: 28, y: 16, w: 8, h: 4 },  // Body bottom
+                
+                { x: 44, y: 20, w: 4, h: 12 }, // Right arm front
+                { x: 40, y: 20, w: 4, h: 12 }, // Right arm right
+                { x: 48, y: 20, w: 4, h: 12 }, // Right arm left
+                { x: 52, y: 20, w: 4, h: 12 }, // Right arm back
+                { x: 44, y: 16, w: 4, h: 4 },  // Right arm top
+                { x: 48, y: 16, w: 4, h: 4 },  // Right arm bottom
+                
+                { x: 36, y: 52, w: 4, h: 12 }, // Left arm front
+                { x: 32, y: 52, w: 4, h: 12 }, // Left arm right
+                { x: 40, y: 52, w: 4, h: 12 }, // Left arm left
+                { x: 44, y: 52, w: 4, h: 12 }, // Left arm back
+                { x: 36, y: 48, w: 4, h: 4 },  // Left arm top
+                { x: 40, y: 48, w: 4, h: 4 },  // Left arm bottom
+                
+                { x: 4, y: 20, w: 4, h: 12 },  // Right leg front
+                { x: 0, y: 20, w: 4, h: 12 },  // Right leg right
+                { x: 8, y: 20, w: 4, h: 12 },  // Right leg left
+                { x: 12, y: 20, w: 4, h: 12 }, // Right leg back
+                { x: 4, y: 16, w: 4, h: 4 },   // Right leg top
+                { x: 8, y: 16, w: 4, h: 4 },   // Right leg bottom
+                
+                { x: 20, y: 52, w: 4, h: 12 }, // Left leg front
+                { x: 16, y: 52, w: 4, h: 12 }, // Left leg right
+                { x: 24, y: 52, w: 4, h: 12 }, // Left leg left
+                { x: 28, y: 52, w: 4, h: 12 }, // Left leg back
+                { x: 20, y: 48, w: 4, h: 4 },  // Left leg top
+                { x: 24, y: 48, w: 4, h: 4 }   // Left leg bottom
+            ];
+            
+            // Outer layer areas (overlay/clothing)
+            const outerAreas = [
+                { x: 40, y: 8, w: 8, h: 8 },   // Head outer front
+                { x: 32, y: 8, w: 8, h: 8 },   // Head outer right
+                { x: 48, y: 8, w: 8, h: 8 },   // Head outer left
+                { x: 56, y: 8, w: 8, h: 8 },   // Head outer back
+                { x: 40, y: 0, w: 8, h: 8 },   // Head outer top
+                { x: 48, y: 0, w: 8, h: 8 },   // Head outer bottom
+                
+                { x: 20, y: 36, w: 8, h: 12 }, // Body outer front
+                { x: 16, y: 36, w: 4, h: 12 }, // Body outer right
+                { x: 28, y: 36, w: 4, h: 12 }, // Body outer left
+                { x: 32, y: 36, w: 8, h: 12 }, // Body outer back
+                { x: 20, y: 32, w: 8, h: 4 },  // Body outer top
+                { x: 28, y: 32, w: 8, h: 4 },  // Body outer bottom
+                
+                { x: 44, y: 36, w: 4, h: 12 }, // Right arm outer front
+                { x: 40, y: 36, w: 4, h: 12 }, // Right arm outer right
+                { x: 48, y: 36, w: 4, h: 12 }, // Right arm outer left
+                { x: 52, y: 36, w: 4, h: 12 }, // Right arm outer back
+                { x: 44, y: 32, w: 4, h: 4 },  // Right arm outer top
+                { x: 48, y: 32, w: 4, h: 4 },  // Right arm outer bottom
+                
+                { x: 52, y: 52, w: 4, h: 12 }, // Left arm outer front
+                { x: 48, y: 52, w: 4, h: 12 }, // Left arm outer right
+                { x: 56, y: 52, w: 4, h: 12 }, // Left arm outer left
+                { x: 60, y: 52, w: 4, h: 12 }, // Left arm outer back
+                { x: 52, y: 48, w: 4, h: 4 },  // Left arm outer top
+                { x: 56, y: 48, w: 4, h: 4 },  // Left arm outer bottom
+                
+                { x: 4, y: 36, w: 4, h: 12 },  // Right leg outer front
+                { x: 0, y: 36, w: 4, h: 12 },  // Right leg outer right
+                { x: 8, y: 36, w: 4, h: 12 },  // Right leg outer left
+                { x: 12, y: 36, w: 4, h: 12 }, // Right leg outer back
+                { x: 4, y: 32, w: 4, h: 4 },   // Right leg outer top
+                { x: 8, y: 32, w: 4, h: 4 },   // Right leg outer bottom
+                
+                { x: 4, y: 52, w: 4, h: 12 },  // Left leg outer front
+                { x: 0, y: 52, w: 4, h: 12 },  // Left leg outer right
+                { x: 8, y: 52, w: 4, h: 12 },  // Left leg outer left
+                { x: 12, y: 52, w: 4, h: 12 }, // Left leg outer back
+                { x: 4, y: 48, w: 4, h: 4 },   // Left leg outer top
+                { x: 8, y: 48, w: 4, h: 4 }    // Left leg outer bottom
+            ];
+            
+            // Copy body layer areas
+            bodyAreas.forEach(area => {
+                copyPixelArea(pixels, skinData.body, area.x, area.y, area.w, area.h, area.x, area.y);
+            });
+            
+            // Copy outer layer areas to their corresponding body positions
+            outerAreas.forEach((area, index) => {
+                if (index < bodyAreas.length) {
+                    const targetArea = bodyAreas[index];
+                    copyPixelArea(pixels, skinData.outer, area.x, area.y, area.w, area.h, targetArea.x, targetArea.y);
+                }
+            });
+        }
+
+        function copyPixelArea(sourcePixels, targetData, srcX, srcY, width, height, dstX, dstY) {
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const srcIndex = ((srcY + y) * 64 + (srcX + x)) * 4;
+                    const dstIndex = ((dstY + y) * 64 + (dstX + x)) * 4;
+                    
+                    if (srcIndex >= 0 && srcIndex < sourcePixels.length && 
+                        dstIndex >= 0 && dstIndex < targetData.length) {
+                        
+                        targetData[dstIndex] = sourcePixels[srcIndex];
+                        targetData[dstIndex + 1] = sourcePixels[srcIndex + 1];
+                        targetData[dstIndex + 2] = sourcePixels[srcIndex + 2];
+                        targetData[dstIndex + 3] = sourcePixels[srcIndex + 3];
+                    }
+                }
+            }
+        }
+
         function newSkin() {
-            if (confirm('Create a new skin? This will clear your current work.')) {
-                initSkinData();
-                updateSkinTextures();
-                updateStatus('New empty 3D skin created');
+            if (confirm('Load a new Steve skin? This will replace your current work.')) {
+                saveUndoState();
+                loadSteveSkin();
+                updateStatus('Loading new Steve skin...');
             }
         }
 
         function clearSkin() {
-            if (confirm('Clear the current editing layer?')) {
+            if (confirm(`Clear the ${currentEditingLayer} layer? This will remove all colors from this layer.`)) {
+                saveUndoState();
+                
                 const data = currentEditingLayer === 'body' ? skinData.body : skinData.outer;
-                data.fill(0); // Clear to transparent
+                data.fill(0);
                 
                 updateSkinTextures();
                 updateStatus(`${currentEditingLayer} layer cleared`);
@@ -2171,7 +2325,6 @@
         function updateStatus(message) {
             document.getElementById('status-text').textContent = message;
             
-            // Update tool name mapping
             const toolNames = {
                 'pen': 'Pen',
                 'brush': 'Brush', 
@@ -2196,8 +2349,10 @@
             return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
         }
 
-        console.log('🎮 3D Minecraft Skin Editor with single voxel painting loaded successfully!');
+        console.log('🎮 3D Minecraft Skin Editor with Steve skin loading capability loaded successfully!');
     </script>
+
+
 
 
 
