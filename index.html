@@ -1962,8 +1962,8 @@ Generate realistic hex colors that match the description. No additional text, ju
                     switch (faceName) {
                         case 'front': return { x: 4 + localX, y: 20 + (11 - localY) };
                         case 'back': return { x: 12 + localX, y: 20 + (11 - localY) };
-                        case 'left': return { x: 0 + localZ, y: 20 + (11 - localY) };   // Swapped left/right
-                        case 'right': return { x: 8 + localZ, y: 20 + (11 - localY) };  // Swapped left/right
+                        case 'left': return { x: 0 + localZ, y: 20 + (11 - localY) };   
+                        case 'right': return { x: 8 + localZ, y: 20 + (11 - localY) }; 
                         case 'top': return { x: 4 + localX, y: 16 + localZ };
                         case 'bottom': return { x: 8 + localX, y: 16 + localZ };
                     }
@@ -1973,10 +1973,10 @@ Generate realistic hex colors that match the description. No additional text, ju
                     switch (faceName) {
                         case 'front': return { x: 20 + localX, y: 52 + (11 - localY) };
                         case 'back': return { x: 28 + localX, y: 52 + (11 - localY) };
-                        case 'right': return { x: 16 + localZ, y: 52 + (11 - localY) };
-                        case 'left': return { x: 24 + localZ, y: 52 + (11 - localY) };
+                        case 'left': return { x: 24 + localZ, y: 52 + (11 - localY) };  // Fixed: was 16
+                        case 'right': return { x: 16 + localZ, y: 52 + (11 - localY) };   // Fixed: was 24
                         case 'top': return { x: 20 + localX, y: 48 + localZ };
-                        case 'bottom': return { x: 24 + localX, y: 48 + (3 - localZ) };  // Fixed this line
+                        case 'bottom': return { x: 24 + localX, y: 48 + (3 - localZ) };
                     }
                     break;
 
