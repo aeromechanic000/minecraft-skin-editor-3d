@@ -1910,81 +1910,157 @@ Generate realistic hex colors that match the description. No additional text, ju
         }
 
         function getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName) {
-            // Minecraft skin texture layout mapping
-            // This function maps each face of each body part to the correct texture coordinates
+            // Check if we're dealing with outer layer by looking at the calling context
+            const isOuterLayer = currentEditingLayer === 'outer';
             
             switch (partName) {
                 case 'head':
-                    switch (faceName) {
-                        case 'front': return { x: 8 + localX, y: 8 + (7 - localY) };
-                        case 'back': return { x: 24 + localX, y: 8 + (7 - localY) };
-                        case 'right': return { x: 0 + localZ, y: 8 + (7 - localY) };
-                        case 'left': return { x: 16 + localZ, y: 8 + (7 - localY) };
-                        case 'top': return { x: 8 + localX, y: 0 + localZ };
-                        case 'bottom': return { x: 16 + localX, y: 0 + (7 - localZ) };
+                    if (isOuterLayer) {
+                        // Head outer layer (hat)
+                        switch (faceName) {
+                            case 'front': return { x: 40 + localX, y: 8 + (7 - localY) };
+                            case 'back': return { x: 56 + localX, y: 8 + (7 - localY) };
+                            case 'right': return { x: 32 + localZ, y: 8 + (7 - localY) };
+                            case 'left': return { x: 48 + localZ, y: 8 + (7 - localY) };
+                            case 'top': return { x: 40 + localX, y: 0 + localZ };
+                            case 'bottom': return { x: 48 + localX, y: 0 + (7 - localZ) };
+                        }
+                    } else {
+                        // Head body layer
+                        switch (faceName) {
+                            case 'front': return { x: 8 + localX, y: 8 + (7 - localY) };
+                            case 'back': return { x: 24 + localX, y: 8 + (7 - localY) };
+                            case 'right': return { x: 0 + localZ, y: 8 + (7 - localY) };
+                            case 'left': return { x: 16 + localZ, y: 8 + (7 - localY) };
+                            case 'top': return { x: 8 + localX, y: 0 + localZ };
+                            case 'bottom': return { x: 16 + localX, y: 0 + (7 - localZ) };
+                        }
                     }
                     break;
                     
                 case 'body':
-                    switch (faceName) {
-                        case 'front': return { x: 20 + localX, y: 20 + (11 - localY) };
-                        case 'back': return { x: 32 + localX, y: 20 + (11 - localY) };
-                        case 'right': return { x: 16 + localZ, y: 20 + (11 - localY) };
-                        case 'left': return { x: 28 + localZ, y: 20 + (11 - localY) };
-                        case 'top': return { x: 20 + localX, y: 16 + localZ };
-                        case 'bottom': return { x: 28 + localX, y: 16 + (3 - localZ) };
+                    if (isOuterLayer) {
+                        // Body outer layer (jacket)
+                        switch (faceName) {
+                            case 'front': return { x: 20 + localX, y: 36 + (11 - localY) };
+                            case 'back': return { x: 32 + localX, y: 36 + (11 - localY) };
+                            case 'right': return { x: 16 + localZ, y: 36 + (11 - localY) };
+                            case 'left': return { x: 28 + localZ, y: 36 + (11 - localY) };
+                            case 'top': return { x: 20 + localX, y: 32 + localZ };
+                            case 'bottom': return { x: 28 + localX, y: 32 + (3 - localZ) };
+                        }
+                    } else {
+                        // Body body layer
+                        switch (faceName) {
+                            case 'front': return { x: 20 + localX, y: 20 + (11 - localY) };
+                            case 'back': return { x: 32 + localX, y: 20 + (11 - localY) };
+                            case 'right': return { x: 16 + localZ, y: 20 + (11 - localY) };
+                            case 'left': return { x: 28 + localZ, y: 20 + (11 - localY) };
+                            case 'top': return { x: 20 + localX, y: 16 + localZ };
+                            case 'bottom': return { x: 28 + localX, y: 16 + (3 - localZ) };
+                        }
                     }
                     break;
                     
                 case 'rightarm':
-                    switch (faceName) {
-                        case 'front': return { x: 44 + localX, y: 20 + (11 - localY) };
-                        case 'back': return { x: 52 + localX, y: 20 + (11 - localY) };
-                        case 'right': return { x: 40 + localZ, y: 20 + (11 - localY) };
-                        case 'left': return { x: 48 + localZ, y: 20 + (11 - localY) };
-                        case 'top': return { x: 44 + localX, y: 16 + localZ };
-                        case 'bottom': return { x: 48 + localX, y: 16 + (3 - localZ) };
+                    if (isOuterLayer) {
+                        // Right arm outer layer
+                        switch (faceName) {
+                            case 'front': return { x: 44 + localX, y: 36 + (11 - localY) };
+                            case 'back': return { x: 52 + localX, y: 36 + (11 - localY) };
+                            case 'right': return { x: 40 + localZ, y: 36 + (11 - localY) };
+                            case 'left': return { x: 48 + localZ, y: 36 + (11 - localY) };
+                            case 'top': return { x: 44 + localX, y: 32 + localZ };
+                            case 'bottom': return { x: 48 + localX, y: 32 + (3 - localZ) };
+                        }
+                    } else {
+                        // Right arm body layer
+                        switch (faceName) {
+                            case 'front': return { x: 44 + localX, y: 20 + (11 - localY) };
+                            case 'back': return { x: 52 + localX, y: 20 + (11 - localY) };
+                            case 'right': return { x: 40 + localZ, y: 20 + (11 - localY) };
+                            case 'left': return { x: 48 + localZ, y: 20 + (11 - localY) };
+                            case 'top': return { x: 44 + localX, y: 16 + localZ };
+                            case 'bottom': return { x: 48 + localX, y: 16 + (3 - localZ) };
+                        }
                     }
                     break;
                     
                 case 'leftarm':
-                    switch (faceName) {
-                        case 'front': return { x: 36 + localX, y: 52 + (11 - localY) };
-                        case 'back': return { x: 44 + localX, y: 52 + (11 - localY) };
-                        case 'right': return { x: 32 + localZ, y: 52 + (11 - localY) };
-                        case 'left': return { x: 40 + localZ, y: 52 + (11 - localY) };
-                        case 'top': return { x: 36 + localX, y: 48 + localZ };
-                        case 'bottom': return { x: 40 + localX, y: 48 + (3 - localZ) };
+                    if (isOuterLayer) {
+                        // Left arm outer layer
+                        switch (faceName) {
+                            case 'front': return { x: 52 + localX, y: 52 + (11 - localY) };
+                            case 'back': return { x: 60 + localX, y: 52 + (11 - localY) };
+                            case 'right': return { x: 48 + localZ, y: 52 + (11 - localY) };
+                            case 'left': return { x: 56 + localZ, y: 52 + (11 - localY) };
+                            case 'top': return { x: 52 + localX, y: 48 + localZ };
+                            case 'bottom': return { x: 56 + localX, y: 48 + (3 - localZ) };
+                        }
+                    } else {
+                        // Left arm body layer
+                        switch (faceName) {
+                            case 'front': return { x: 36 + localX, y: 52 + (11 - localY) };
+                            case 'back': return { x: 44 + localX, y: 52 + (11 - localY) };
+                            case 'right': return { x: 32 + localZ, y: 52 + (11 - localY) };
+                            case 'left': return { x: 40 + localZ, y: 52 + (11 - localY) };
+                            case 'top': return { x: 36 + localX, y: 48 + localZ };
+                            case 'bottom': return { x: 40 + localX, y: 48 + (3 - localZ) };
+                        }
                     }
                     break;
                     
                 case 'rightleg':
-                    switch (faceName) {
-                        case 'front': return { x: 4 + localX, y: 20 + (11 - localY) };
-                        case 'back': return { x: 12 + localX, y: 20 + (11 - localY) };
-                        case 'left': return { x: 0 + localZ, y: 20 + (11 - localY) };   
-                        case 'right': return { x: 8 + localZ, y: 20 + (11 - localY) }; 
-                        case 'top': return { x: 4 + localX, y: 16 + localZ };
-                        case 'bottom': return { x: 8 + localX, y: 16 + localZ };
+                    if (isOuterLayer) {
+                        // Right leg outer layer
+                        switch (faceName) {
+                            case 'front': return { x: 4 + localX, y: 36 + (11 - localY) };
+                            case 'back': return { x: 12 + localX, y: 36 + (11 - localY) };
+                            case 'left': return { x: 0 + localZ, y: 36 + (11 - localY) };
+                            case 'right': return { x: 8 + localZ, y: 36 + (11 - localY) };
+                            case 'top': return { x: 4 + localX, y: 32 + localZ };
+                            case 'bottom': return { x: 8 + localX, y: 32 + localZ };
+                        }
+                    } else {
+                        // Right leg body layer
+                        switch (faceName) {
+                            case 'front': return { x: 4 + localX, y: 20 + (11 - localY) };
+                            case 'back': return { x: 12 + localX, y: 20 + (11 - localY) };
+                            case 'left': return { x: 0 + localZ, y: 20 + (11 - localY) };
+                            case 'right': return { x: 8 + localZ, y: 20 + (11 - localY) };
+                            case 'top': return { x: 4 + localX, y: 16 + localZ };
+                            case 'bottom': return { x: 8 + localX, y: 16 + localZ };
+                        }
                     }
                     break;
                     
                 case 'leftleg':
-                    switch (faceName) {
-                        case 'front': return { x: 20 + localX, y: 52 + (11 - localY) };
-                        case 'back': return { x: 28 + localX, y: 52 + (11 - localY) };
-                        case 'left': return { x: 24 + localZ, y: 52 + (11 - localY) };  // Fixed: was 16
-                        case 'right': return { x: 16 + localZ, y: 52 + (11 - localY) };   // Fixed: was 24
-                        case 'top': return { x: 20 + localX, y: 48 + localZ };
-                        case 'bottom': return { x: 24 + localX, y: 48 + (3 - localZ) };
+                    if (isOuterLayer) {
+                        // Left leg outer layer
+                        switch (faceName) {
+                            case 'front': return { x: 4 + localX, y: 52 + (11 - localY) };
+                            case 'back': return { x: 12 + localX, y: 52 + (11 - localY) };
+                            case 'right': return { x: 0 + localZ, y: 52 + (11 - localY) };
+                            case 'left': return { x: 8 + localZ, y: 52 + (11 - localY) };
+                            case 'top': return { x: 4 + localX, y: 48 + localZ };
+                            case 'bottom': return { x: 8 + localX, y: 48 + (3 - localZ) };
+                        }
+                    } else {
+                        // Left leg body layer - FIXED COORDINATES
+                        switch (faceName) {
+                            case 'front': return { x: 4 + localX, y: 20 + (11 - localY) };
+                            case 'back': return { x: 12 + localX, y: 20 + (11 - localY) };
+                            case 'right': return { x: 0 + localZ, y: 20 + (11 - localY) };
+                            case 'left': return { x: 8 + localZ, y: 20 + (11 - localY) };
+                            case 'top': return { x: 4 + localX, y: 16 + localZ };
+                            case 'bottom': return { x: 8 + localX, y: 16 + (3 - localZ) };
+                        }
                     }
                     break;
-
-            }
-            
-            // Fallback
-            return { x: 0, y: 0 };
-        }
+                            }
+                            
+                            return { x: 0, y: 0 };
+                        }
 
         function createGridOverlay() {
             gridOverlay = new THREE.Group();
