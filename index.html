@@ -1976,7 +1976,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                         case 'right': return { x: 16 + localZ, y: 52 + (11 - localY) };
                         case 'left': return { x: 24 + localZ, y: 52 + (11 - localY) };
                         case 'top': return { x: 20 + localX, y: 48 + localZ };
-                        case 'bottom': return { x: 24 + localX, y: 48 + localZ };  // Fixed: removed (3 - localZ)
+                        case 'bottom': return { x: 24 + localX, y: 48 + (3 - localZ) };  // Fixed this line
                     }
                     break;
 
