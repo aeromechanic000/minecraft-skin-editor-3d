@@ -4,7 +4,7 @@ Web Application: [Minecraft 3D Skin Editor](https://minecraft-skin-editor-3d.ver
 
 A web app for creating and editing of Minecraft skin.
 
-The process is powered by [Pollinations.AI](https://pollinations.ai/)!
+![Screenshot 2025-06-12 at 20.11.34.png](https://s2.loli.net/2025/06/12/TKsOVME7Y6XjeGn.png)
 
 ## Minecraft AI
 
