@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com https://text.pollinations.ai;
         connect-src 'self' https://text.pollinations.ai https://image.pollinations.ai;
@@ -363,7 +361,7 @@
             width: 100%;
             height: 100%;
             border-radius: 3px;
-            cursor: crosshair;
+            cursor: grab;
         }
 
         .controls {
@@ -620,6 +618,7 @@
             font-weight: bold;
             z-index: 100;
             pointer-events: none;
+            display: none;
         }
 
         .color-input-group {
@@ -800,13 +799,13 @@
             
             <div class="center-panel">
                 <div class="viewer-container">
-                    <div class="edit-mode-indicator" id="edit-mode-indicator">Editing: Body Layer</div>
+                    <div class="edit-mode-indicator" id="edit-mode-indicator">Edit Mode: Body Layer</div>
                     <div class="skin-preview">
                         <canvas id="skinViewer"></canvas>
                     </div>
                     <div class="controls">
                         <button id="resetView" class="control-btn">🔄 Reset View</button>
-                        <button id="toggleMode" class="control-btn">🔄 Toggle Mode</button>
+                        <button id="toggleMode" class="control-btn">🎨 Edit Mode</button>
                         <button id="zoomIn" class="control-btn">🔍 Zoom+</button>
                         <button id="zoomOut" class="control-btn">🔍 Zoom-</button>
                     </div>
@@ -829,10 +828,10 @@
                 <div class="layer-controls">
                     <div class="panel-title" style="font-size: 16px; margin-bottom: 15px;">🎨 3D Tools</div>
                     <div class="tools-grid">
-                        <button id="tool-pen" class="grid-tool-btn active" onclick="setTool('pen')">✏️ Pen</button>
+                        <button id="tool-pen" class="grid-tool-btn" onclick="setTool('pen')">✏️ Pen</button>
                         <button id="tool-brush" class="grid-tool-btn" onclick="setTool('brush')">🖌️ Brush</button>
                         <button id="tool-eyedropper" class="grid-tool-btn" onclick="setTool('eyedropper')">💧 Picker</button>
-                        <button id="tool-rotate" class="grid-tool-btn" onclick="setTool('rotate')">🔄 Rotate</button>
+                        <button id="tool-rotate" class="grid-tool-btn active" onclick="setTool('rotate')">🔄 Rotate</button>
                     </div>
                     
                     <div style="margin-top: 15px;">
@@ -845,9 +844,9 @@
         
         <div class="status-bar">
             <div class="status-info">
-                <span id="status-text">🎨 3D Paint Mode - Click on the model to paint pixels!</span>
-                <span id="pixel-info">Editing: Body Layer | Tool: Pen</span>
-                <span id="camera-info">Camera: Free | Zoom: 100%</span>
+                <span id="status-text">👁️ View Mode - Drag to rotate camera, scroll to zoom</span>
+                <span id="pixel-info">Current Layer: Body | Tool: Rotate</span>
+                <span id="camera-info">Camera: View | Zoom: 100%</span>
             </div>
         </div>
     </div>
@@ -856,11 +855,11 @@
         // Global variables
         let scene, camera, renderer, controls;
         let skinModel, gridOverlay;
-        let currentTool = 'pen';
+        let currentTool = 'rotate';
         let currentEditingLayer = 'body';
         let currentColor = '#8B4513';
         let showPixelGrid = true;
-        let isEditMode = true;
+        let isEditMode = false; // FIXED: Start in view mode
 
         // Layer visibility states
         let layerVisibility = {
@@ -926,7 +925,7 @@
             updateLayerDisplay();
             updateLayerButtons();
             updatePixelGridButton();
-            updateStatus('🎨 3D Skin Editor loaded - Loading Steve skin...');
+            updateStatus('👁️ View Mode - Loading Steve skin...');
         });
 
         // UPDATED: AI Generation Function - Now using JSON-based approach
@@ -1469,11 +1468,12 @@ Generate realistic hex colors that match the description. No additional text, ju
                 const editingLayerMeshes = [];
                 
                 skinModel.children.forEach(layerGroup => {
-                    if (layerGroup.visible && layerGroup.name === `${currentEditingLayer}_layer`) {
+                    // Check if this is the layer we're currently editing
+                    if (layerGroup.name === `${currentEditingLayer}_layer` && layerGroup.visible) {
                         layerGroup.children.forEach(partGroup => {
                             if (partGroup.visible) {
                                 partGroup.children.forEach(mesh => {
-                                    if (mesh.visible && mesh.material.opacity > 0) {
+                                    if (mesh.visible) {
                                         editingLayerMeshes.push(mesh);
                                     }
                                 });
@@ -1495,6 +1495,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                     const intersect = intersects[0];
                     const face = intersect.object;
                     
+                    // Make sure this face belongs to the current editing layer
                     if (face.userData && face.userData.layer === currentEditingLayer) {
                         hoveredFace = face;
                         face.material.emissive.setHex(0x404040);
@@ -1701,7 +1702,7 @@ Generate realistic hex colors that match the description. No additional text, ju
             
             // Body surfaces (8x12x4)
             const bodyGroup = createPartSurfaces('body', -4, 4, 38, 50, -2, 2, layer, scale);
-            
+
             // Right arm surfaces (4x12x4)
             const rightArmGroup = createPartSurfaces('rightarm', -7, -3, 38, 50, -2, 2, layer, scale);
             
@@ -1785,7 +1786,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                 // Only create faces that are actually on the surface
                 if (!face.condition) return;
                 
-                const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, face.name, partName);
+                const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, face.name, partName, layer);
                 if (!texCoords) return;
                 
                 const { x: textureX, y: textureY } = texCoords;
@@ -1858,8 +1859,11 @@ Generate realistic hex colors that match the description. No additional text, ju
             };
         }
 
-        // FIXED: Complete texture coordinate mapping for all faces and body parts
-        function getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName, partName) {
+        // FIXED: Complete texture coordinate mapping for all faces and body parts with proper layer support
+        function getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName, partName, layerContext) {
+            // Use the layer context if provided, otherwise fall back to current editing layer
+            const targetLayer = layerContext || currentEditingLayer;
+            
             // Convert voxel coordinates to local coordinates within each body part
             let localX, localY, localZ;
             
@@ -1906,12 +1910,12 @@ Generate realistic hex colors that match the description. No additional text, ju
                 }
             }
             
-            return getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName);
+            return getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName, targetLayer);
         }
 
-        function getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName) {
-            // Check if we're dealing with outer layer by looking at the calling context
-            const isOuterLayer = currentEditingLayer === 'outer';
+        function getTextureCoordinatesForBodyPart(partName, localX, localY, localZ, faceName, targetLayer) {
+            // Use the target layer to determine which texture coordinates to use
+            const isOuterLayer = targetLayer === 'outer';
             
             switch (partName) {
                 case 'head':
@@ -2176,7 +2180,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                         if (face.userData) {
                             const { voxelX, voxelY, voxelZ, layer, face: faceName } = face.userData;
                             
-                            const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName);
+                            const texCoords = getVoxelFaceTextureCoords(voxelX, voxelY, voxelZ, faceName, null, layer);
                             if (texCoords) {
                                 const material = getVoxelMaterial(texCoords.x, texCoords.y, layer);
                                 face.material.color.setHex(material.color);
@@ -2287,28 +2291,24 @@ Generate realistic hex colors that match the description. No additional text, ju
 
         // Layer functions
         function toggleLayerVisibility(layer) {
-            layerVisibility[layer] = !layerVisibility[layer];
-            
-            updateCurrentEditingLayer();
+            // Always switch to editing the clicked layer when in edit mode
+            if (isEditMode) {
+                currentEditingLayer = layer;
+                layerVisibility[layer] = true; // Make sure the layer is visible when editing
+            } else {
+                // In view mode, just toggle visibility
+                layerVisibility[layer] = !layerVisibility[layer];
+            }
             
             updateLayerButtons();
             updateLayerDisplay();
             updateLayerVisibility3D();
             updateGridOverlay();
             
-            const status = layerVisibility[layer] ? 'shown' : 'hidden';
-            updateStatus(`${layer} layer ${status}`);
-        }
-
-        function updateCurrentEditingLayer() {
-            if (layerVisibility.outer) {
-                currentEditingLayer = 'outer';
-            } else if (layerVisibility.body) {
-                currentEditingLayer = 'body';
-            } else {
-                currentEditingLayer = 'body';
-                layerVisibility.body = true;
-            }
+            const status = isEditMode ? 
+                `Now editing: ${layer} layer` : 
+                `${layer} layer ${layerVisibility[layer] ? 'visible' : 'hidden'}`;
+            updateStatus(status);
         }
 
         function updateLayerVisibility3D() {
@@ -2346,13 +2346,28 @@ Generate realistic hex colors that match the description. No additional text, ju
             const bodyLayerBtn = document.getElementById('layer-body');
             const outerLayerBtn = document.getElementById('layer-outer');
             
-            bodyLayerBtn.classList.toggle('visible', layerVisibility.body);
-            bodyLayerBtn.classList.remove('editing');
-            bodyLayerBtn.textContent = 'Body';
+            // Clear all classes first
+            bodyLayerBtn.classList.remove('visible', 'editing');
+            outerLayerBtn.classList.remove('visible', 'editing');
             
-            outerLayerBtn.classList.toggle('visible', layerVisibility.outer);
-            outerLayerBtn.classList.remove('editing');
-            outerLayerBtn.textContent = 'Outer';
+            // Set visibility
+            if (layerVisibility.body) bodyLayerBtn.classList.add('visible');
+            if (layerVisibility.outer) outerLayerBtn.classList.add('visible');
+            
+            // Set editing indicator
+            if (currentEditingLayer === 'body') {
+                bodyLayerBtn.classList.add('editing');
+                bodyLayerBtn.textContent = 'Body';
+            } else {
+                bodyLayerBtn.textContent = 'Body';
+            }
+            
+            if (currentEditingLayer === 'outer') {
+                outerLayerBtn.classList.add('editing');
+                outerLayerBtn.textContent = '️Outer';
+            } else {
+                outerLayerBtn.textContent = 'Outer';
+            }
         }
 
         function updatePixelGridButton() {
@@ -2386,12 +2401,17 @@ Generate realistic hex colors that match the description. No additional text, ju
         function updateLayerDisplay() {
             const indicator = document.getElementById('edit-mode-indicator');
             
-            if (currentEditingLayer === 'body') {
-                indicator.textContent = 'Editing: Body Layer';
-                indicator.style.background = 'rgba(76, 175, 80, 0.9)';
+            if (isEditMode) {
+                indicator.style.display = 'block';
+                if (currentEditingLayer === 'body') {
+                    indicator.textContent = 'Edit Mode: Body Layer';
+                    indicator.style.background = 'rgba(76, 175, 80, 0.9)';
+                } else {
+                    indicator.textContent = 'Edit Mode: Outer Layer';
+                    indicator.style.background = 'rgba(255, 152, 0, 0.9)';
+                }
             } else {
-                indicator.textContent = 'Editing: Outer Layer';
-                indicator.style.background = 'rgba(255, 152, 0, 0.9)';
+                indicator.style.display = 'none';
             }
         }
 
@@ -2408,10 +2428,14 @@ Generate realistic hex colors that match the description. No additional text, ju
                 } else {
                     canvas.style.cursor = 'crosshair';
                 }
+                updateStatus(`🎨 Edit Mode - Use tools to modify the ${currentEditingLayer} layer`);
             } else {
                 toggleBtn.textContent = '🎨 Edit Mode';
                 canvas.style.cursor = 'grab';
+                updateStatus('👁️ View Mode - Drag to rotate camera, scroll to zoom');
             }
+            
+            updateLayerDisplay();
         }
 
         function resetView() {
@@ -2824,7 +2848,7 @@ Generate realistic hex colors that match the description. No additional text, ju
                 'rotate': 'Rotate'
             };
             
-            document.getElementById('pixel-info').textContent = `Editing: ${currentEditingLayer === 'body' ? 'Body' : 'Outer'} Layer | Tool: ${toolNames[currentTool]}`;
+            document.getElementById('pixel-info').textContent = `Current Layer: ${currentEditingLayer === 'body' ? 'Body' : 'Outer'} | Tool: ${toolNames[currentTool]}`;
         }
 
         // Utility functions
